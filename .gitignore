@@ -31,4 +31,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 *.mp4
-*.txt
+*.txt*.csv\n
+venv
+.idea
