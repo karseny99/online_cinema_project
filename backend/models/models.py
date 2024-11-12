@@ -2,7 +2,9 @@ from datetime import datetime
 
 from sqlalchemy import MetaData, Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.ext.declarative import declarative_base
 
+Base = declarative_base()
 metadata = MetaData()
 
 users = Table(
@@ -59,3 +61,10 @@ genome_scores = Table(
     Column("relevance", Integer, nullable=False),
 )
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=True)
+    password = Column(String)
