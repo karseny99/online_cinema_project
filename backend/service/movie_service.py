@@ -1,4 +1,3 @@
-
 from repositories.movie_repo import MovieRepository
 
 class MovieUseCase:
@@ -14,3 +13,11 @@ class MovieUseCase:
     def list_movies(self):
         return self.movie_repository.list_all_movies()
 
+
+class MovieService:
+    def __init__(self):
+        self.repository = MovieRepository()
+
+    def fetch_movie_url(self, movie_name: str) -> str:
+        """Получить URL для воспроизведения фильма."""
+        return self.repository.get_movie_url(movie_name)

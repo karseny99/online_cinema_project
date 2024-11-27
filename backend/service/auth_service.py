@@ -20,7 +20,7 @@ class AuthService:
         except UserAlreadyExistsError as e:
             raise ValueError(f"Registration failed: {str(e)}")
         except Exception as e:
-            raise Exception("An unexpected error occurred during registration.")  # Общая ошибка
+            raise Exception("An unexpected error occurred during registration.")
 
     def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
