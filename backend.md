@@ -12,3 +12,11 @@ migration up
 alembic upgrade head
 ```
 
+s3 up
+```bash
+docker-compose up 
+```
+
+```bash
+root@098f18c7ed31:/# psql -U pg-user -d cinema-db
+```
