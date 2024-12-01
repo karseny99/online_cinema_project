@@ -16,7 +16,7 @@ def register(request: RegisterRequest, response: Response):
             email=request.email,
             username=request.username,
             password=request.password,
-            role="reader"
+            role="viewer"
         )
 
         resp = RegisterResponse(
