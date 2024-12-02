@@ -18,5 +18,9 @@ docker-compose up
 ```
 
 ```bash
-root@098f18c7ed31:/# psql -U pg-user -d cinema-db
+root@098f18c7ed31:/# psql -U user -d cinema-db
+```
+
+```bash
+docker run -d --name cinema-db-container -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=cinema-db -p 5432:5432 postgres:16.6-alpine3.19
 ```
