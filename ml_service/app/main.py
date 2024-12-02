@@ -1,5 +1,4 @@
 import app.service.MLRecomendation
-import pika
 
 
 '''
