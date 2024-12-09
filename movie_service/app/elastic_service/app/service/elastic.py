@@ -1,6 +1,6 @@
 
 from elasticsearch import Elasticsearch, NotFoundError
-import repository.movies
+import movie_service.app.repository.connector
 
 class ElasticSearch:
     def __init__(self, host: str = "localhost", port: int = 9200, index_name: str = "movies"):
@@ -23,16 +23,27 @@ class ElasticSearch:
             Creates elastic index
         '''
         if not self.es.indices.exists(index=self.index_name):
-            self.es.indices.create(index=self.index_name)
+            mapping = {
+                "mappings": {
+                    "properties": {
+                        "title": {"type": "text"},
+                        "year": {"type": "integer"},
+                        "genre": {"type": "keyword"},
+                        "director": {"type": "text"},
+                        "description": {"type": "text"}
+                    }
+                }
+            }
+            self.es.indices.create(index=self.index_name, body=mapping)
         
 
     def load_to_index(self) -> None:
         '''
             Loading data from database to index
         '''
-        movies = repository.movies.get_movies_full_info()
+        movies = repository.connector.get_movies_full_info()
         for movie in movies:
-            self.es.index(index="movies", id=movie["id"], document=movie)
+            self.es.index(index="movies", id=movie["movie_id"], document=movie)
 
 
     def create_if_empty(self) -> None:
@@ -77,7 +88,7 @@ class ElasticSearch:
                 }
             })
 
-        # Добавляем фильтры
+        # Adding filters
         if "year" in query:
             es_query["query"]["bool"]["filter"].append({
                 "term": {
