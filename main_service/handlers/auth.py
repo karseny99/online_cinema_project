@@ -48,7 +48,6 @@ def register(request: RegisterRequest, response: Response):
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, response: Response):
     auth_service = AuthService()
-
     try:
         user = auth_service.authenticate_user(username=request.username, password=request.password)
         if not user:

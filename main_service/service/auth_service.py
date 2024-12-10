@@ -46,10 +46,13 @@ class AuthService:
             email=email,
             password_hash=hashed_password,
             role=role)
+        print(f"user_id: {user_id}")
         return user_id
 
     def authenticate_user(self, username: str, password: str):
+        print(f"service:: username: {username}, password: {password}")
         user = self.user_repository.get_user_login_info(username)
+
         if not user:
             return None
         if not self.verify_password(password, user.password):

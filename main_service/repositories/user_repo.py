@@ -24,10 +24,9 @@ class UserRepository:
 
         with get_session() as session:
             session.add(new_user)
-  
+
             print(f"User with id {new_user.user_id} has been added to database")
             return new_user.user_id
-
 
     def get_user_info(self, login: str) -> User:
         '''
@@ -37,18 +36,17 @@ class UserRepository:
         with get_session() as session:
             user = None
             try:
-                user = User.from_orm(session.query(User).filter_by(username==login).one())
+                user = User.from_orm(session.query(User).filter_by(username == login).one())
                 return user
             except NoResultFound:
                 print(f"User with login {login} not found in usernames, will try to find in emails")
 
             try:
-                user = User.from_orm(session.query(User).filter_by(email==login).one())
+                user = User.from_orm(session.query(User).filter_by(email == login).one())
                 return user
             except NoResultFound:
                 print(f"User with login {login} not found in database")
                 return None
-
 
     def get_user_id_info(self, user_id: int) -> User:
         '''
@@ -64,7 +62,10 @@ class UserRepository:
         '''
 
         with get_session() as session:
-            return User.from_orm(session.query(User).filter(User.username == username).one_or_none())
+            user_orm = session.query(User).filter(User.username == username).one_or_none()
+            if user_orm is None:
+                return None
+            return User.from_orm(user_orm)
 
     def get_all_usernames(self) -> list:
         '''

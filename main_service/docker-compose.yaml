@@ -1,15 +1,18 @@
 version: '3.8'
 
 services:
-  minio:
-    image: minio/minio:latest
-    container_name: minio
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    container_name: rabbitmq
     ports:
-      - "9000:9000"  # API порт
-      - "9001:9001"  # Консольный порт
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address ":9001"
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
     volumes:
-      - ./data:/data
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:

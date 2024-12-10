@@ -34,3 +34,4 @@ _deps
 *.txt*.csv\n
 venv
 .idea
+dump*
