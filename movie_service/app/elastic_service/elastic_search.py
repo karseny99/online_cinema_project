@@ -1,8 +1,8 @@
 from app.elastic_service.elastic import ElasticSearch
-from app.models.movie_item import MovieItem, SearchQueryElastic
 from pydantic import ValidationError
+from app.models.movie_item import *
 
-async def elastic_search(query: SearchQueryElastic) -> list[MovieItem]:
+async def elastic_search(query: ElasticRequest) -> ElasticResponse:
     ''' 
         Initializes index of elastic search
         Then searching for given query
@@ -23,11 +23,33 @@ async def elastic_search(query: SearchQueryElastic) -> list[MovieItem]:
     finally:
         await es_client.close()
 
-    results = [MovieItem(**movie) for movie in results]
+    results = ElasticResponse(movies=[MovieItem(**movie) for movie in results])
     # Вывод результатов
     print("Found movie IDs:", results)
     
     return results
+
+def parse_search_request(contract: BaseContractModel) -> ElasticRequest:
+    '''
+        Gets raw message and parse it into ElasticRequest class
+    '''
+    if contract.contract_type != "search_request":
+        raise ValueError("Invalid contract type")
+    
+    try:
+        elastic_request = ElasticRequest(**contract.body)
+        return elastic_request
+    except ValidationError as e:
+        raise ValueError(f"Invalid body structure: {e}")
+    
+def convert_to_base_contract(elastic_response: ElasticResponse) -> BaseContractModel:
+    '''
+        Internal class converts to base contract class
+    '''
+    return BaseContractModel(
+        contract_type="search_response",
+        body={"movies": elastic_response.movies}
+    )
 
 
 # if __name__ == "__main__":

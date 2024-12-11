@@ -1,15 +1,15 @@
 from app.elastic_service.elastic_search import elastic_search
 import asyncio
-from app.models.movie_item import SearchQueryElastic
 
-example_query = SearchQueryElastic(
-    title="Inception", 
-    year=None, 
-    genre=None, 
-    director="Christopher Nolan",
-    page=1,         
-    page_size=10   
-)
+# example_query = ElasticRequest(
+#     contract_type=
+#     title="Inception", 
+#     year=None, 
+#     genre=None, 
+#     director="Christopher Nolan",
+#     page=1,         
+#     page_size=10   
+# )
 
 # search_query = {
 #     "title": "Inception",
@@ -20,7 +20,20 @@ example_query = SearchQueryElastic(
 #     "page_size": 10
 # }
 
+# incoming_message = BaseContractModel(
+#     contract_type="search_request",
+#     body={
+#         "title": "Inception",
+#         "year": 2010,
+#         "genre": ["Action", "Sci-Fi"],
+#         "director": "Christopher Nolan",
+#         "page": 1,
+#         "page_size": 10
+#     }
+# )
 
+
+ 
 
 if __name__ == "__main__":
-    asyncio.run(elastic_search(example_query))
+    asyncio.run(elastic_search(parse_search_request(incoming_message)))
