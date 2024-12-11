@@ -1,5 +1,5 @@
 
-from elasticsearch import ElasticsearchWarning, AsyncElasticsearch
+from elasticsearch import ElasticsearchWarning, AsyncElasticsearch 
 from app.repository.movie import get_movie_info
 import warnings
 
@@ -205,8 +205,12 @@ class ElasticSearch:
         from_ = (page - 1) * page_size
         size = page_size
         
-        response = await self.es.search(index="movies", body=es_query, from_=from_, size=size)
-        
+        try:
+            response = await self.es.search(index="movies", body=es_query, from_=from_, size=size)
+        except Exception as e:
+            print("Error during Elasticsearch search:", e)
+            raise e
+            
         return [hit["_source"] for hit in response["hits"]["hits"]]
 
     async def check_index(self):
