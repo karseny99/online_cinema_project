@@ -1,0 +1,1 @@
+pg_dump --no-owner -Fc -h localhost -p 5432 -U user cinema-db -f dump1112
