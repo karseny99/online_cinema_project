@@ -2,3 +2,7 @@ elasticsearch==8.16.0
 pika==1.3.2
 SQLAlchemy==1.4.49
 asyncpg==0.30.0
+cinemagoer==2023.5.1
+pandas==2.2.3
+aiohttp==3.11.10
+ ydantic==2.10.3
