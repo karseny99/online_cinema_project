@@ -5,7 +5,9 @@ from settings import (
     RMQ_USER,
     RMQ_PASSWORD,
     MQ_EXCHANGE,
-    MQ_ROUTING_KEY
+    MQ_ROUTING_KEY,
+    MQ_ROUTING_KEY_1,
+    MQ_ROUTING_KEY_2,
 )
 
 connection_params = pika.ConnectionParameters(

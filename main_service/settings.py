@@ -18,3 +18,5 @@ RMQ_USER = "guest"
 RMQ_PASSWORD = "guest"
 MQ_EXCHANGE = ""
 MQ_ROUTING_KEY = "movies"
+MQ_ROUTING_KEY_1 = "movies1" # first channel
+MQ_ROUTING_KEY_2 = "movies2" # second channel
