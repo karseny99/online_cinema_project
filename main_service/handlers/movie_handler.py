@@ -1,12 +1,8 @@
-# from fastapi import APIRouter, Depends, HTTPException
-# from fastapi.responses import HTMLResponse
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from service.movie_service import MovieService
-# from repositories.movie_repo import MovieRepository
-# from dependencies import get_async_session
-#
-# router = APIRouter()
-#
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse
+
+router = APIRouter()
+
 # @router.get("/movies/{movie_id}", response_class=HTMLResponse)
 # async def get_movie_with_player(
 #     movie_id: int,
@@ -44,29 +40,34 @@
 #         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 #
 #
-# @router.get("/movies", response_model=list[dict])
-# async def get_all_movies(
-#     limit: int = 10,
-#     offset: int = 0,
-#     session: AsyncSession = Depends(get_async_session)
-# ):
-#     """
-#     Эндпоинт для получения списка всех фильмов с поддержкой пагинации.
-#     """
-#     try:
-#         movie_repo = MovieRepository(session)
-#         movie_service = MovieService(movie_repo)
-#
-#         movies = await movie_service.get_all_movies(limit=limit, offset=offset)
-#         return [
-#             {
-#                 "id": movie["id"],
-#                 "title": movie["title"],
-#                 "genres": movie["genres"]
-#             }
-#             for movie in movies
-#         ]
-#
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-#
+@router.get("/movies", response_model=list[dict])
+def get_all_movies(
+        limit: int = 10,
+        offset: int = 0,
+):
+    """
+    Эндпоинт для получения списка всех фильмов с поддержкой пагинации.
+    """
+    try:
+
+        movies = [
+            {"id": 1,
+             "title": "Star Wars. Episode 1",
+             "genres": "Fantasy|Science fiction"
+             },
+            {"id": 2,
+             "title": "Interstellar",
+             "genres": "Fantasy"
+             },
+        ]
+        return [
+            {
+                "id": movie["id"],
+                "title": movie["title"],
+                "genres": movie["genres"]
+            }
+            for movie in movies
+        ]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
