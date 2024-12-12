@@ -1,5 +1,5 @@
-from app.elastic_service.elastic_search import elastic_search
-import asyncio
+# from app.elastic_service.elastic_search import elastic_search
+# import asyncio
 
 # example_query = ElasticRequest(
 #     contract_type=
@@ -35,5 +35,15 @@ import asyncio
 
  
 
+# if __name__ == "__main__":
+#     asyncio.run(elastic_search(parse_search_request(incoming_message)))
+
+
+from message_queue.rpc_client import MovieRpcClient
+
 if __name__ == "__main__":
-    asyncio.run(elastic_search(parse_search_request(incoming_message)))
+    movie_rpc = MovieRpcClient()
+
+    print(" [x] Requesting fib(30)")
+    response = movie_rpc.call(30)
+    print(f" [.] Got {response}")

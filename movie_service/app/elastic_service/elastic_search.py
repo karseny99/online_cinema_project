@@ -1,6 +1,6 @@
 from app.elastic_service.elastic import ElasticSearch
 from pydantic import ValidationError
-from app.models.movie_item import *
+from app.models.movie import *
 
 async def elastic_search(query: ElasticRequest) -> ElasticResponse:
     ''' 
@@ -48,7 +48,7 @@ def convert_to_base_contract(elastic_response: ElasticResponse) -> BaseContractM
     '''
     return BaseContractModel(
         contract_type="search_response",
-        body={"movies": elastic_response.movies}
+        body={"movies": elastic_response.movies},
     )
 
 

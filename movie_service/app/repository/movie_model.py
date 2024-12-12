@@ -20,7 +20,6 @@ class Movie(Base):
             imdb_id = movie_orm.imdb_id,
         )
 
-
 class MoviesWithInfo(Base):
     __tablename__ = 'movies_with_info'
 
