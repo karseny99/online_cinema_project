@@ -39,11 +39,7 @@
 #     asyncio.run(elastic_search(parse_search_request(incoming_message)))
 
 
-from message_queue.rpc_client import MovieRpcClient
+from message_queue.rpc_client import *
 
 if __name__ == "__main__":
-    movie_rpc = MovieRpcClient()
-
-    print(" [x] Requesting fib(30)")
-    response = movie_rpc.call(30)
-    print(f" [.] Got {response}")
+    main()
