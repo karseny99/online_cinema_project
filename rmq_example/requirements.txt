@@ -1,0 +1,2 @@
+pydantic==2.10.3
+celery==5.4.0

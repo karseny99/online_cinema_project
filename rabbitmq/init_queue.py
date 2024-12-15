@@ -19,7 +19,7 @@ def declare_queues(channel):
 
     args = {
         'x-message-ttl': MQ_MESSAGE_TTL,
-        'x-dead-letter-exchange': '',
+        'x-dead-letter-exchange': 'rpc.dlx',
         'x-dead-letter-routing-key': MQ_ROUTING_KEY_DLQ
     }
     # Объявляем очереди для movie_service
