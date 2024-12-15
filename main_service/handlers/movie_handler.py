@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
-from models.movie_service_models import ElasticRequest, BaseContractModel, ElasticResponse, MovieItem
+from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem
+from models.models import BaseContractModel
 from rpc_client.rpc_client import get_movie_rpc_client
 from typing import List, Optional
 import json 

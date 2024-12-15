@@ -1,8 +1,10 @@
+from pyexpat.errors import messages
+
 import pika
 import uuid
 import json
 import time
-from models.movie_service_models import BaseContractModel
+from models.models import BaseContractModel
 from settings import (
     MQ_HOST,
     MQ_PORT,
@@ -49,6 +51,7 @@ class RpcClient:
         # print(f"Sending request with correlation_id: {self.corr_id}")
 
         message_body = contract_message.json()
+        # message_body = json.dumps(contract_message.__dict__)
 
         self.channel.basic_publish(
             exchange='',
@@ -61,7 +64,7 @@ class RpcClient:
         )
 
         # Ожидаем ответ
-        timeout = time.time() + 6  # Устанавливаем время ожидания в 6 секунд
+        timeout = time.time() + 7
         while self.response is None:
             # Проверяем, не истекло ли время ожидания
             if time.time() > timeout:

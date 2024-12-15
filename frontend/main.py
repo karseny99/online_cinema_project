@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Annotated
 
-import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastui import FastUI, AnyComponent, prebuilt_html, components as c
@@ -9,111 +8,108 @@ from fastui.components.display import DisplayMode, DisplayLookup
 from fastui.events import GoToEvent, BackEvent, PageEvent
 from fastui.forms import fastui_form
 from pydantic import BaseModel, Field
-from typing import Optional, List
-import uvicorn
-
-API_URL = "http://localhost:8080"
-
-
-def get_movies():
-    response = requests.request("GET", API_URL + "/api/movies")
-    return response
-
 
 app = FastAPI()
 
 c.Page.model_rebuild()
 
-
-class Movie(BaseModel):
-    movie_id: int
-    movie_title: Optional[str]
-    # year: Optional[int]
-    # director: Optional[str]
-    # description: Optional[str]
-    # info_title: Optional[str]
-    # genres: Optional[List[str]]
-    # average_rating: Optional[float]
+class UserAdd(BaseModel):
+    name: str = Field(title="Имя")
+    dob: date = Field(title="Дата рождения")
 
 
-@app.get("/api/movies", response_model=FastUI, response_model_exclude_none=True)
-def get_all_movies() -> list[AnyComponent]:
-    # Получение списка фильмов
-    # movies = [Movie(**movie) for movie in get_movies().json()]
-    movies = [Movie(movie_title='Some title1', movie_id=1), Movie(movie_title='Some title2', movie_id=2)]
-    print(movies)  # Для отладки
+class User(UserAdd):
+    id: int
 
-    # Генерация страницы с таблицей фильмов
+
+class UserDelete(BaseModel):
+    id: int
+
+
+users = [
+    User(id=1, name='Артём', dob=date(1990, 1, 1)),
+]
+
+
+@app.post("/api/user")
+def add_user(form: Annotated[UserAdd, fastui_form(UserAdd)]):
+    print(f"{form=}")
+    new_user = User(id=users[-1].id + 1 if users else 1, **form.model_dump())
+    users.append(new_user)
+    return [c.FireEvent(event=GoToEvent(url='/'))]
+
+
+@app.post("/api/user/delete")
+def add_user(form: Annotated[UserDelete, fastui_form(UserDelete)]):
+    global users
+    users = [user for user in users if user.id != form.id]
+    return [c.FireEvent(event=GoToEvent(url='/'))]
+
+
+@app.get("/api/user/add", response_model=FastUI, response_model_exclude_none=True)
+def add_user_page():
     return [
         c.Page(
             components=[
-                c.Heading(text='Фильмы', level=2),
+                c.Link(components=[c.Text(text='Назад')], on_click=BackEvent()),
+                c.Heading(text='Добавить пользователя', level=2),
+                c.ModelForm(
+                    model=UserAdd,
+                    submit_url="/api/user"
+                )
+            ]
+        )
+    ]
+
+
+@app.get("/api/", response_model=FastUI, response_model_exclude_none=True)
+def users_table() -> list[AnyComponent]:
+    return [
+        c.Page(
+            components=[
+                c.Heading(text='Пользователи', level=2),
                 c.Table(
-                    data=movies,  # Данные таблицы
-                    data_model=Movie,  # Модель данных
+                    data=users,
+                    data_model=User,
                     columns=[
-                        DisplayLookup(field='movie_id'),
-                        DisplayLookup(
-                            field='movie_title',
-                            on_click=GoToEvent(url='/movies/{id}/')  # Ссылка с подстановкой id
-                        ),
+                        DisplayLookup(field='id'),
+                        DisplayLookup(field='name', on_click=GoToEvent(url='/user/{id}/')),
+                        DisplayLookup(field='dob', mode=DisplayMode.date),
                     ],
+                ),
+                c.Button(text="Добавить пользователя", on_click=GoToEvent(url="/user/add"))
+            ]
+        ),
+    ]
+
+
+@app.get("/api/user/{user_id}/", response_model=FastUI, response_model_exclude_none=True)
+def user_profile(user_id: int) -> list[AnyComponent]:
+    try:
+        user = next(u for u in users if u.id == user_id)
+    except StopIteration:
+        raise HTTPException(status_code=404, detail="User not found")
+    return [
+        c.Page(
+            components=[
+                c.Heading(text=user.name, level=2),
+                c.Link(components=[c.Text(text='Back')], on_click=BackEvent()),
+                c.Details(data=user),
+                c.Button(text="Удалить пользователя", on_click=PageEvent(name="delete-user")),
+                c.Form(
+                    submit_url="/api/user/delete",
+                    form_fields=[
+                        c.FormFieldInput(name='id', title='', initial=user_id, html_type='hidden')
+                    ],
+                    footer=[],
+                    submit_trigger=PageEvent(name="delete-user"),
                 ),
             ]
         ),
     ]
-
-@app.get("/api/movies/{movie_id}/", response_model=FastUI, response_model_exclude_none=True)
-def movie_page(movie_id: int) -> list[AnyComponent]:
-    # movies = [Movie(**movie) for movie in get_movies().json()]
-    movie = Movie(movie_title='Some title', movie_id=1)
-    print(f"MOVIE: {movie}")
-    return [
-        c.Page(
-            components=[
-                c.Heading(text=movie.movie_title, level=2),
-                c.Link(components=[c.Text(text='Back')], on_click=BackEvent()),
-                c.Details(data=movie),
-            ]
-        ),
-    ]
-    # return [
-    #     c.Page(
-    #         components=[
-    #             c.Heading(text='No film by such id')
-    #         ]
-    #     )
-    # ]
 
 
 @app.get('/{path:path}')
 async def html_landing() -> HTMLResponse:
     """Simple HTML page which serves the React app, comes last as it matches all paths."""
-    return HTMLResponse(prebuilt_html(title='Online cinema project'))
-
-if __name__ == "__main__":
-    uvicorn.run(app, host='0.0.0.0', port=8081)
-
-'''
-c.Div(
-            components=[
-                c.Heading(text='Dynamic Modal', level=2),
-                c.Markdown(
-                    text=(
-                        'The button below will open a modal with content loaded from the server when '
-                        "it's opened using `ServerLoad`."
-                    )
-                ),
-                c.Button(text='Show Dynamic Modal', on_click=PageEvent(name='dynamic-modal')),
-                c.Modal(
-                    title='Dynamic Modal',
-                    body=[c.ServerLoad(path='/components/dynamic-content')],
-                    footer=[
-                        c.Button(text='Close', on_click=PageEvent(name='dynamic-modal', clear=True)),
-                    ],
-                    open_trigger=PageEvent(name='dynamic-modal'),
-                ),
-            ],
-            class_name='border-top mt-3 pt-1',
-        ),
-'''
+    return HTMLResponse(prebuilt_html(title='FastUI Demo'))
