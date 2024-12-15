@@ -2,7 +2,7 @@ from app.elastic_service.elastic import ElasticSearch
 from pydantic import ValidationError
 from app.models.movie import *
 
-async def elastic_search(query: ElasticRequest) -> ElasticResponse:
+def elastic_search(query: ElasticRequest) -> ElasticResponse:
     ''' 
         Initializes index of elastic search
         Then searching for given query
@@ -12,16 +12,16 @@ async def elastic_search(query: ElasticRequest) -> ElasticResponse:
     '''
     es_client = ElasticSearch(host="localhost", port=9200, index_name="movies")
     # es_client.delete_index()
-    await es_client.load_to_index()
-    await es_client.check_index()
+    es_client.load_to_index()
+    es_client.check_index()
 
     try:
     # Выполнение поиска
-        results = await es_client.search(query.model_dump(exclude_none=True))
+        results = es_client.search(query.model_dump(exclude_none=True))
     except Exception as e:
         raise e
     finally:
-        await es_client.close()
+        es_client.close()
 
     results = ElasticResponse(movies=[MovieItem(**movie) for movie in results])
     # Вывод результатов

@@ -1,5 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
+from models.movie_service_models import ElasticRequest, BaseContractModel, ElasticResponse, MovieItem
+from rpc_client.rpc_client import get_movie_rpc_client
+from typing import List, Optional
+import json 
+
 
 router = APIRouter()
 
@@ -69,5 +74,44 @@ def get_all_movies(
             for movie in movies
         ]
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.get("/search", response_model=ElasticResponse)
+def search_movies(
+    title: Optional[str] = None,
+    year: Optional[int] = None,
+    genre: Optional[List[str]] = None,
+    director: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 10,
+    rpc_client = Depends(get_movie_rpc_client)
+):
+    """
+        Эндпоинт для поиска фильмов с поддержкой пагинации.
+    """
+    try:
+        request = ElasticRequest(
+            title=title,
+            year=year,
+            genre=genre,
+            director=director,
+            page=page,
+            page_size=page_size
+        )
+
+        # TODO: empty request validation
+        contract_message = BaseContractModel(
+            contract_type="search_request",  
+            body=request  
+        )
+        contract_response: BaseContractModel = rpc_client.call(contract_message)
+        if contract_response.contract_type == "search_response":
+            movies_list = [MovieItem(**movie) for movie in contract_response.body['movies']]
+            elastic_response = ElasticResponse(movies=movies_list)
+            return elastic_response
+        else:
+            raise HTTPException(status_code=400, detail="Invalid contract type received.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
