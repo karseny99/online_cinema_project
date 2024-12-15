@@ -1,5 +1,10 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import List, Optional
+from typing import List, Optional, Any
+
+class BaseContractModel(BaseModel):
+    contract_type: str  # Поле для указания типа контракта "search_request"
+    body: Any
+    # request_id: str
 
 class BaseRequest(BaseModel):
     request_id: str

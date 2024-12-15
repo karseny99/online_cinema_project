@@ -1,3 +1,4 @@
+import json
 import time
 import pika
 from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse
@@ -23,16 +24,22 @@ def process_request(request_data: SetMovieRatingRequest) -> SetMovieRatingRespon
 
 def on_request(ch, method, props, body):
     try:
-        request_data = body.decode('utf-8')
+        request_data = json.loads(body.decode('utf-8'))
         print(f"Received message: {request_data}")
+
         correlation_id = props.correlation_id
-        response = process_request(request_data)
+
+        # Преобразуем в модель
+        request_model = SetMovieRatingRequest(**request_data)
+        response_model = process_request(request_model)
+
+        response_json = json.dumps(response_model.__dict__)
 
         ch.basic_publish(
             exchange='',
             routing_key=props.reply_to,
             properties=pika.BasicProperties(correlation_id=correlation_id),
-            body=str(response),
+            body=response_json,
         )
 
         ch.basic_ack(delivery_tag=method.delivery_tag)

@@ -24,6 +24,7 @@ class UserRepository:
 
         with get_session() as session:
             session.add(new_user)
+            session.flush() # Чтобы получить не None а нормальный user_id до commit
 
             print(f"User with id {new_user.user_id} has been added to database")
             return new_user.user_id

@@ -11,12 +11,12 @@ DB_CONFIG = {
 POOL_SIZE = int(os.getenv("POOL_SIZE", 10))
 POOL_MAX_SIZE = int(os.getenv("POOL_MAX_SIZE", 20))
 
-# TODO: move to local.env
-MQ_HOST = "0.0.0.0"
-MQ_PORT = "5672"
-RMQ_USER = "guest"
-RMQ_PASSWORD = "guest"
-MQ_EXCHANGE = ""
-MQ_ROUTING_KEY = "movies"
-MQ_ROUTING_KEY_1 = "movies1" # first channel
-MQ_ROUTING_KEY_2 = "movies2" # second channel
+MQ_HOST = os.getenv('MQ_HOST', 'localhost')
+MQ_PORT = os.getenv('MQ_PORT', '5672')
+RMQ_USER = os.getenv('RMQ_PASSWORD', 'guest')
+RMQ_PASSWORD = os.getenv('RMQ_PASSWORD', 'guest')
+MQ_EXCHANGE = os.getenv('MQ_EXCHANGE', '')
+MQ_ROUTING_KEY_DLQ = os.getenv('MQ_ROUTING_KEY_DLQ', 'dlq')
+MQ_ROUTING_KEY_RPC_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_QUEUE', 'rpc_user_service_queue')
+MQ_ROUTING_KEY_RPC_RESPONSE_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_RESPONSE_QUEUE', 'rpc_user_service_response_queue')
+MQ_MESSAGE_TTL = int(os.getenv('MQ_MESSAGE_TTL', 6000))  # Время жизни сообщения в миллисекундах
