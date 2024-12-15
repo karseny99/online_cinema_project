@@ -1,10 +1,6 @@
 from pydantic import BaseModel, ValidationError
 from typing import Optional, List, Any
 
-class BaseContractModel(BaseModel):
-    contract_type: str  # Поле для указания типа контракта "search_request"
-    body: Any
-
 
 class ElasticRequest(BaseModel):
     title: Optional[str]

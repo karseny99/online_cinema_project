@@ -1,5 +1,9 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import List, Optional
+from typing import Optional, Any
+
+class BaseContractModel(BaseModel):
+    contract_type: str  # Поле для указания типа контракта "search_request"
+    body: Any
 
 class BaseRequest(BaseModel):
     request_id: str
@@ -26,10 +30,3 @@ class LoginRequest(BaseRequest):
 class LoginResponse(BaseResponse):
     access_token: str   # JWT
     token_type: str     # bearer
-
-class GetMoviesRequest(BaseRequest):
-    filters: Optional[List]
-
-class GetMoviesResponse(BaseResponse):
-    movies: List
-

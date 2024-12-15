@@ -1,9 +1,9 @@
-from connector import *
+from app.repositories.connector import *
 
 from datetime import datetime
 from sqlalchemy.orm.exc import NoResultFound
 
-from models.movie_rating import MovieRating
+from app.repositories.models.movie_rating import MovieRating
 
 class MovieRatingRepository:
     def __init__(self):
@@ -24,6 +24,7 @@ class MovieRatingRepository:
 
         with get_session() as session:
             session.add(new_rating)
+            session.flush()  # Принудительно сохраняем объект, чтобы получить rating_id
 
             print(f"Rating with id {new_rating.rating_id} has been added to database")
             return new_rating.rating_id

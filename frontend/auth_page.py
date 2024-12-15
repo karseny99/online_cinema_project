@@ -22,26 +22,18 @@ session_token = {"access_token": None}
 app = FastAPI()
 
 
-def register_user_req(username, password, email, fullname):
-    try:
-        url = f"{API_BASE_URL}/auth/register"
-        payload = {
-            "request_id": "1234",
-            "source": "fastui_client",
-            "username": username,
-            "password": password,
-            "email": email,
-            "full_name": fullname
-        }
-        response = requests.post(url, json=payload)
-        if response.status_code == 200:
-            return json.loads(response.text).get("message", "Registration successful!")
-        elif response.status_code == 400:
-            return json.loads(response.text).get("message", "User already registered")
-        else:
-            return f"Error: {response.json().get('message', 'Unknown error')}"
-    except Exception as e:
-        return f"Error: {str(e)}"
+def register_user_req(username, password, email, fullname) -> http.HTTPStatus:
+    url = f"{API_BASE_URL}/auth/register"
+    payload = {
+        "request_id": "1234",
+        "source": "fastui_client",
+        "username": username,
+        "password": password,
+        "email": email,
+        "full_name": fullname
+    }
+    response = requests.post(url, json=payload)
+    return http.HTTPStatus(response.status_code)
 
 
 def login_user_req(username, password) -> bool:
@@ -61,7 +53,6 @@ def login_user_req(username, password) -> bool:
         return False
 
 
-
 class UserLogin(BaseModel):
     username: constr(min_length=3, max_length=50) = Field(title="Логин")
     password: constr(min_length=8) = Field(title="Пароль")
@@ -73,7 +64,7 @@ class UserRegister(UserLogin):
 
 
 c.Page.model_rebuild()
-
+c.Modal.model_rebuild()
 
 # @app.post("/api/user")
 # def add_user(form: Annotated[UserAdd, fastui_form(UserAdd)]):
@@ -83,25 +74,32 @@ c.Page.model_rebuild()
 #     return [c.FireEvent(event=GoToEvent(url='/'))]
 
 
-@app.post("/api/user/add")
+@app.post("/api/user/add", response_model=FastUI, response_model_exclude_none=True)
 def add_user(form: Annotated[UserRegister, fastui_form(UserRegister)]):
-    response = requests.post(
-        f"{API_BASE_URL}/auth/register",
-        json={
-            "request_id": "1",
-            "source": "fastUI",
-            "username": form.username,
-            "password": form.password,
-            "email": form.email,
-            "full_name": form.full_name
-        },
+    status = register_user_req(
+        username=form.username,
+        password=form.password,
+        email=form.email,
+        fullname=form.full_name,
     )
-    res = response.json()
-    if res.get('status') == http.HTTPStatus.OK:
+
+    if status == http.HTTPStatus.OK:
         print("User registered successfully!")
-        return [c.FireEvent(event=GoToEvent(url='/login'))]
-    else:
-        print(f"SOMETHING WENT WRONG: {res.get('message')}\n")
+        return [
+            c.Modal(
+                title='Успешная регистрация',
+                body=[c.Paragraph(text='Пользователь добавлен')],
+                footer=[
+                    c.Button(text='Close', on_click=PageEvent(name='static-modal', clear=True)),
+                ],
+                open_trigger=PageEvent(name='static-modal'),
+            ),
+            c.FireEvent(event=PageEvent(name='static-modal')),
+            c.FireEvent(event=GoToEvent(url='/login'))
+        ]
+    elif status == http.HTTPStatus.BAD_REQUEST:
+        return [c.FireEvent(event=GoToEvent(url='/register'))]
+
 
 @app.post("/api/user/log-in")
 def login_user(form: Annotated[UserLogin, fastui_form(UserLogin)]):
@@ -117,6 +115,7 @@ def login_user(form: Annotated[UserLogin, fastui_form(UserLogin)]):
     except Exception as e:
         print(f"Error occurred: {e}")
 
+
 @app.get("/api/main_page", response_model=FastUI, response_model_exclude_none=True)
 def show_main_page():
     return [
@@ -128,6 +127,7 @@ def show_main_page():
         )
     ]
 
+
 @app.get("/api/register", response_model=FastUI, response_model_exclude_none=True)
 def add_user_page():
     return [
@@ -138,7 +138,7 @@ def add_user_page():
                 c.ModelForm(
                     model=UserRegister,
                     submit_url="/api/user/add"
-                )
+                ),
             ]
         )
     ]
