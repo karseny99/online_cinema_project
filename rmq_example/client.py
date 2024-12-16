@@ -1,6 +1,6 @@
 from celery import Celery
 from pydantic import BaseModel
-from kombu import Queue
+from kombu import Exchange, Queue
 import random
 from settings import (
     RMQ_PASSWORD,
@@ -18,13 +18,33 @@ app = Celery('client',
 )
 
 # настройка для исполбзуемой очереди
-app.conf.task_queues = (
-    Queue(MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, routing_key=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, queue_arguments={
-        'x-message-ttl': MQ_MESSAGE_TTL,
-        'x-dead-letter-exchange': 'rpc.dlx',
-        'x-dead-letter-routing-key': 'rpc_dlq'
-    }),
-)
+# app.conf.task_queues = (
+#     Queue(MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, routing_key=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, queue_arguments={
+#         'x-message-ttl': MQ_MESSAGE_TTL,
+#         'x-dead-letter-exchange': 'rpc.dlx',
+#         'x-dead-letter-routing-key': 'rpc_dlq'
+#     }),
+# )
+
+dead_letter_queue_option = {
+    'x-message-ttl': MQ_MESSAGE_TTL,
+    'x-dead-letter-exchange': 'rpc.dlx',
+    'x-dead-letter-routing-key': 'rpc_dlq',
+}
+
+default_exchange = Exchange(MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, type='direct')
+dlx_exchange = Exchange('rpc.dlx', type='direct')
+
+default_queue = Queue(
+    MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
+    default_exchange,
+    routing_key=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
+    queue_arguments=dead_letter_queue_option)
+dead_letter_queue = Queue(
+    'rpc.dlx', dlx_exchange, routing_key='rpc_dlq')
+
+app.conf.task_queues = (default_queue, dead_letter_queue)
+
 
 class MessageModel(BaseModel):
     text: str
