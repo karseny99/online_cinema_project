@@ -2,15 +2,14 @@ from sqlalchemy.future import select
 
 from app.repository.database import *
 from app.repository.models import MoviesWithInfo
-import asyncio
 
 
 @connection
-async def get_movie_by_id(session, movie_id: int) -> MoviesWithInfo:
+def get_movie_by_id(session, movie_id: int) -> MoviesWithInfo:
     '''
         Returns MovieWithInfo by movie_id
     '''
-    result = await session.execute(select(MoviesWithInfo).where(MoviesWithInfo.movie_id==movie_id))
+    result = session.execute(select(MoviesWithInfo).where(MoviesWithInfo.movie_id==movie_id))
     movies = result.one_or_none()
 
     if movies:

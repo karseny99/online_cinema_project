@@ -42,7 +42,6 @@ app.conf.task_queues = (
 
 redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB)
 
-lock = asyncio.Lock()
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='get_movie_info')
 def get_movie_info(message_data):
@@ -58,7 +57,7 @@ def get_movie_info(message_data):
     
     message = MovieRequest(**message_data)
 
-    result = asyncio.run(MovieService.get_movie_by_id(message.movie_id))
+    result = MovieService.get_movie_by_id(message.movie_id)
 
     redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
     return result.model_dump()
