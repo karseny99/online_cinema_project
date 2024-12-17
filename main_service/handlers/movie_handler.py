@@ -106,7 +106,7 @@ def search_movies(
             page_size=page_size
         )
 
-        found_movies = service.movie_service.find_movies(request) 
+        found_movies = service.movie_service.search_movies(request) 
         return found_movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

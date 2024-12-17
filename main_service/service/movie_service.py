@@ -1,13 +1,13 @@
 from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem
 from rpc_client.rpc_client import get_movie_rpc_client
 
-def find_movies(request: ElasticRequest) -> ElasticResponse:
+def search_movies(request: ElasticRequest) -> ElasticResponse:
     '''
         sends task to get movies by given requests
         Returns ElasticResponse-class 
         Returns None if timed out
     '''
-    search_function_name = "main.process_message"
+    search_function_name = "search_movie"
 
     rpc_client = get_movie_rpc_client()
     
