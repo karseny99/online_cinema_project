@@ -5,4 +5,5 @@ asyncpg==0.30.0
 cinemagoer==2023.5.1
 pandas==2.2.3
 aiohttp==3.11.10
- ydantic==2.10.3
+pydantic==2.10.3
+celery==5.4.0

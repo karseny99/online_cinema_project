@@ -2,7 +2,7 @@ from app.service.elastic import ElasticSearch
 from pydantic import ValidationError
 from app.models.models import *
 
-def elastic_search(query: ElasticRequest) -> ElasticResponse:
+async def elastic_search(query: ElasticRequest) -> ElasticResponse:
     ''' 
         Initializes index of elastic search
         Then searching for given query
@@ -12,16 +12,16 @@ def elastic_search(query: ElasticRequest) -> ElasticResponse:
     '''
     es_client = ElasticSearch(host="localhost", port=9200, index_name="movies")
     # es_client.delete_index()
-    es_client.load_to_index()
-    es_client.check_index()
+    await es_client.load_to_index()
+    # await es_client.check_index()
 
     try:
     # Выполнение поиска
-        results = es_client.search(query.model_dump(exclude_none=True))
+        results = await es_client.search(query.model_dump(exclude_none=True))
     except Exception as e:
         raise e
     finally:
-        es_client.close()
+        await es_client.close()
 
     results = ElasticResponse(movies=[MovieItem(**movie) for movie in results])
     # Вывод результатов
@@ -29,6 +29,20 @@ def elastic_search(query: ElasticRequest) -> ElasticResponse:
     
     return results
 
+async def elastic_update_index() -> ElasticResponse:
+    ''' 
+        Updates elastic index comparing num of movies in es-index and num of movies in database
+    '''
+
+    es_client = ElasticSearch(host="localhost", port=9200, index_name="movies")
+
+    try:
+        es_client.update_index_with_new_movies()
+    except Exception as e:
+        raise e
+    finally:
+        await es_client.close()
+        
 # unused
 # def parse_search_request(contract: BaseContractModel) -> ElasticRequest:
 #     '''

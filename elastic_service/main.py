@@ -1,51 +1,5 @@
-# from app.elastic_service.elastic_search import elastic_search
-# import asyncio
 
-# example_query = ElasticRequest(
-#     contract_type=
-#     title="Inception", 
-#     year=None, 
-#     genre=None, 
-#     director="Christopher Nolan",
-#     page=1,         
-#     page_size=10   
-# )
-
-# search_query = {
-#     "title": "Inception",
-#     "year": 2010,
-#     "genre": ["Sci-Fi"], # Also as select box   
-#     "director": "Christopher Nolan", # Should be as selection in front
-#     "page": 1,
-#     "page_size": 10
-# }
-
-# incoming_message = BaseContractModel(
-#     contract_type="search_request",
-#     body={
-#         "title": "Inception",
-#         "year": 2010,
-#         "genre": ["Action", "Sci-Fi"],
-#         "director": "Christopher Nolan",
-#         "page": 1,
-#         "page_size": 10
-#     }
-# )
-
-
- 
-
-# if __name__ == "__main__":
-#     asyncio.run(elastic_search(parse_search_request(incoming_message)))
-
-
-# from message_queue.rpc_client import *
-
-# if __name__ == "__main__":
-#     main()
-
-
-
+import asyncio
 from celery import Celery
 from pydantic import BaseModel
 from kombu import Queue
@@ -59,7 +13,7 @@ from settings import (
 )
 
 from app.models.models import ElasticRequest
-from app.service.elastic_search import elastic_search
+from app.service.elastic_search import elastic_search, elastic_update_index
 
 app = Celery(
     'tasks', 
@@ -87,11 +41,19 @@ class MessageModel(BaseModel):
 
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='search_movie')
-def process_message(message_data):
-    # message = MessageModel(**message_data)  # Восстановление модели Pydantic
-    # Обработка сообщения
-
+def search_movie(message_data):
+    ''' 
+        Calls elastic search with given query
+        Returns ElasticResponse class
+    '''
     message = ElasticRequest(**message_data)
-    return elastic_search(message).model_dump()
-    # return f"Received message from {message.sender}: {message.text}" # 
+    result = asyncio.run(elastic_search(message))
+    return result.model_dump()
 
+
+@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='update_index')
+def update_elastic_index():
+    '''
+        Updates elastic-index 
+    '''
+    asyncio.run(elastic_update_index())

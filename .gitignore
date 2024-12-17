@@ -33,6 +33,7 @@ _deps
 *.mp4
 *.txt
 *.csv
+*.tsv
 venv
 .idea
 dump*

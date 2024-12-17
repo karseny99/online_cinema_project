@@ -68,6 +68,20 @@ class RpcClient:
             print(f"An error occurred: {e}")
             return None
 
+    def send_task_no_wait(self, function_name: str, request: BaseModel):
+        '''
+            Sends task to service without waiting for a response
+        '''
+        args = [request.model_dump()] if request is not None else []
+
+        # Отправка сообщения через RPC без ожидания результата
+        self.app.send_task(
+            function_name,
+            args=args,
+            queue=self.routing_key,
+            ignore_result=True,
+        )
+        print(f'Task {function_name} sent without waiting for a response.')
 
 
 def get_movie_rpc_client() -> RpcClient:
