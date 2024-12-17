@@ -7,24 +7,24 @@ from models.user_service_models import SetMovieRatingRequest, SetMovieRatingResp
 
 log = logging.getLogger(__name__)
 
-# class UserService:
-#     def __init__(self):
-#         self.user_rpc = get_user_rpc_client()
-#
-#     def set_movie_rating(self, req: SetMovieRatingRequest) -> SetMovieRatingResponse:
-#         request = BaseContractModel(
-#             contract_type="set_rating_request",
-#             body=req
-#         )
-#         response = self.user_rpc.call(request)
-#
-#         if response is None:
-#             log.error(f"RESPONSE IS NONE")
-#             return SetMovieRatingResponse(movie_id=-1, user_id=-1, success=False)
-#
-#         elif response.contract_type == "set_rating_response":
-#             log.debug(f" [.] Got {response}")
-#             return response.body
+class UserService:
+    def __init__(self):
+        self.user_rpc = get_user_rpc_client()
+
+    def set_movie_rating(self, req: SetMovieRatingRequest) -> SetMovieRatingResponse:
+        request = BaseContractModel(
+            contract_type="set_rating_request",
+            body=req
+        )
+        response = self.user_rpc.call(request)
+
+        if response is None:
+            log.error(f"RESPONSE IS NONE")
+            return SetMovieRatingResponse(movie_id=-1, user_id=-1, success=False)
+
+        elif response.contract_type == "set_rating_response":
+            log.debug(f" [.] Got {response}")
+            return response.body
 #
 
 def main():

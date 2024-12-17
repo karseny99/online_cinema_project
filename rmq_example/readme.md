@@ -1,4 +1,4 @@
-celery -A tasks worker --loglevel=info 
+celery -A main worker --loglevel=info 
 для старта воркера
 
 

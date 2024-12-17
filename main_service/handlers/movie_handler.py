@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse
-from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem
-from models.models import BaseContractModel
-from rpc_client.rpc_client import get_movie_rpc_client
 from typing import List, Optional
 import json 
 
+from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem
+from models.models import BaseContractModel
+# from rpc_client.rpc_client import send_task
+import service.movie_service
 
 router = APIRouter()
 
@@ -44,8 +45,8 @@ router = APIRouter()
 #         raise e
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-#
-#
+
+
 @router.get("/movies", response_model=list[dict])
 def get_all_movies(
         limit: int = 10,
@@ -81,17 +82,20 @@ def get_all_movies(
 
 @router.get("/search", response_model=ElasticResponse)
 def search_movies(
-    title: Optional[str] = None,
+    title: Optional[str] = Query(None, min_length=1, description="Title of the movie"),
     year: Optional[int] = None,
     genre: Optional[List[str]] = None,
     director: Optional[str] = None,
     page: int = 1,
     page_size: int = 10,
-    rpc_client = Depends(get_movie_rpc_client)
 ):
     """
         Эндпоинт для поиска фильмов с поддержкой пагинации.
     """
+
+    if not title:
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+
     try:
         request = ElasticRequest(
             title=title,
@@ -102,17 +106,7 @@ def search_movies(
             page_size=page_size
         )
 
-        # TODO: empty request validation
-        contract_message = BaseContractModel(
-            contract_type="search_request",  
-            body=request  
-        )
-        contract_response: BaseContractModel = rpc_client.call(contract_message)
-        if contract_response.contract_type == "search_response":
-            movies_list = [MovieItem(**movie) for movie in contract_response.body['movies']]
-            elastic_response = ElasticResponse(movies=movies_list)
-            return elastic_response
-        else:
-            raise HTTPException(status_code=400, detail="Invalid contract type received.")
+        found_movies = service.movie_service.find_movies(request) 
+        return found_movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

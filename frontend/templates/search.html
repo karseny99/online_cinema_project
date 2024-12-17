@@ -29,28 +29,43 @@
     <script>
         document.getElementById('searchForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Предотвращаем стандартное поведение формы
-
+    
+            const titleInput = document.getElementById('title');
+            const title = titleInput.value.trim(); // Убираем пробелы
+    
+            // Проверка на пустое значение
+            if (!title) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<p style="color: red;">Поле "Title" не должно быть пустым.</p>';
+                return; // Прекращаем выполнение, если поле пустое
+            }
+    
             const formData = new FormData(this);
             const params = new URLSearchParams(formData).toString();
-
+    
             const response = await fetch(`/api/search?${params}`);
             const data = await response.json();
-
+    
             // Обработка результатов
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = ''; // Очищаем предыдущие результаты
-
-            if (data.movies && data.movies.length > 0) {
-                data.movies.forEach(movie => {
-                    const movieDiv = document.createElement('div');
-                    movieDiv.innerHTML = `<h3>${movie.movie_title} (${movie.year})</h3>
-                                          <p>Director: ${movie.director}</p>
-                                          <p>Rating: ${movie.average_rating}</p>
-                                          <p>Description: ${movie.description || 'N/A'}</p>`;
-                    resultsDiv.appendChild(movieDiv);
-                });
+    
+            if (response.ok) {
+                if (data.movies && data.movies.length > 0) {
+                    data.movies.forEach(movie => {
+                        const movieDiv = document.createElement('div');
+                        movieDiv.innerHTML = `<h3>${movie.movie_title} (${movie.year})</h3>
+                                              <p>Director: ${movie.director}</p>
+                                              <p>Rating: ${movie.average_rating}</p>
+                                              <p>Description: ${movie.description || 'N/A'}</p>`;
+                        resultsDiv.appendChild(movieDiv);
+                    });
+                } else {
+                    resultsDiv.innerHTML = '<p>No movies found.</p>';
+                }
             } else {
-                resultsDiv.innerHTML = '<p>No movies found.</p>';
+                // Обработка ошибки
+                resultsDiv.innerHTML = `<p style="color: red;">${data.detail}</p>`;
             }
         });
     </script>

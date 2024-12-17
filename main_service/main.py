@@ -9,7 +9,7 @@ import uvicorn
 
 app = FastAPI()
 templates = Jinja2Templates(directory="../frontend/templates")
-# app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(movie_router, prefix="/api", tags=["movies catalog"])
@@ -19,6 +19,10 @@ app.include_router(user_router, prefix="/api", tags=["set movie rating"])
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("base.html", {"request": request})
+
+@app.get("/search", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("search.html", {"request": request})
 
 
 if __name__ == "__main__":
