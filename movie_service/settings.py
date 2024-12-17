@@ -1,5 +1,13 @@
 import os
 
+# PostgreSQL
+DB_CONFIG = {
+    "dbname": "cinema-db",
+    "user": "user",
+    "password": "password",
+    "host": "localhost",
+    "port": "5432",
+}
 # DB_CONFIG = {
 #     "dbname": os.getenv("DB_NAME"),
 #     "user": os.getenv("DB_USER"),
@@ -8,9 +16,10 @@ import os
 #     "port": os.getenv("DB_PORT"),
 # }
 
-# POOL_SIZE = int(os.getenv("POOL_SIZE", 10))
-# POOL_MAX_SIZE = int(os.getenv("POOL_MAX_SIZE", 20))
+POOL_SIZE = int(os.getenv("POOL_SIZE", 10))
+POOL_MAX_SIZE = int(os.getenv("POOL_MAX_SIZE", 20))
 
+# RabbitMQ
 MQ_HOST = os.getenv('MQ_HOST', 'localhost')
 MQ_PORT = os.getenv('MQ_PORT', '5672')
 RMQ_USER = os.getenv('RMQ_PASSWORD', 'guest')
@@ -24,3 +33,9 @@ MQ_ROUTING_KEY_RPC_MOVIE_RESPONSE_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_MOVIE_RE
 MQ_ROUTING_KEY_RPC_USER_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_USER_QUEUE', 'rpc_user_queue')
 MQ_ROUTING_KEY_RPC_USER_RESPONSE_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_USER_RESPONSE_QUEUE', 'rpc_user_response_queue')
 MQ_MESSAGE_TTL = int(os.getenv('MQ_MESSAGE_TTL', 6000))  # Время жизни сообщения в миллисекундах
+
+# Redis
+REDIS_HOST = os.getenv('RS_HOST', 'localhost')
+REDIS_PORT = os.getenv('RS_POST', '6379')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+REDIS_DB = os.getenv('RS_DB', '1') # В редисе можно создать разные бдшки, я для сервисов буду работать с разными бдшками в редисе. Это "ид" бдшки

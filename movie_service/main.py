@@ -1,65 +1,25 @@
-# from app.elastic_service.elastic_search import elastic_search
-# import asyncio
 
-# example_query = ElasticRequest(
-#     contract_type=
-#     title="Inception", 
-#     year=None, 
-#     genre=None, 
-#     director="Christopher Nolan",
-#     page=1,         
-#     page_size=10   
-# )
-
-# search_query = {
-#     "title": "Inception",
-#     "year": 2010,
-#     "genre": ["Sci-Fi"], # Also as select box   
-#     "director": "Christopher Nolan", # Should be as selection in front
-#     "page": 1,
-#     "page_size": 10
-# }
-
-# incoming_message = BaseContractModel(
-#     contract_type="search_request",
-#     body={
-#         "title": "Inception",
-#         "year": 2010,
-#         "genre": ["Action", "Sci-Fi"],
-#         "director": "Christopher Nolan",
-#         "page": 1,
-#         "page_size": 10
-#     }
-# )
-
-
- 
-
-# if __name__ == "__main__":
-#     asyncio.run(elastic_search(parse_search_request(incoming_message)))
-
-
-# from message_queue.rpc_client import *
-
-# if __name__ == "__main__":
-#     main()
-
-
-
+import asyncio
 from celery import Celery
 from pydantic import BaseModel
 from kombu import Queue
-from app.settings import (
+import json
+
+from app.models.models import MovieRequest
+from app.services.movie_service import MovieService
+from app.services.redis import RedisClient
+from settings import (
     RMQ_PASSWORD,
     RMQ_USER,
     MQ_HOST,
     MQ_PORT,
     MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
     MQ_MESSAGE_TTL,
+    REDIS_HOST,
+    REDIS_PORT,
+    REDIS_PASSWORD,
+    REDIS_DB,
 )
-
-from app.models.movie import ElasticRequest
-from app.elastic_service.elastic_search import elastic_search
 
 app = Celery(
     'tasks', 
@@ -80,18 +40,25 @@ app.conf.task_queues = (
     }),
 )
 
+redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB)
 
-class MessageModel(BaseModel):
-    text: str
-    sender: str
+lock = asyncio.Lock()
 
+@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='get_movie_info')
+def get_movie_info(message_data):
+    ''' 
+        Calls elastic search with given query
+        Returns ElasticResponse class
+    '''
 
-@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE)
-def process_message(message_data):
-    # message = MessageModel(**message_data)  # Восстановление модели Pydantic
-    # Обработка сообщения
+    cache_key = f"get_movie_info:{json.dumps(message_data)}"
+    cached_result = redis_client.get(cache_key)
+    if cached_result:
+        return cached_result
+    
+    message = MovieRequest(**message_data)
 
-    message = ElasticRequest(**message_data)
-    return elastic_search(message).model_dump()
-    # return f"Received message from {message.sender}: {message.text}" # 
+    result = asyncio.run(MovieService.get_movie_by_id(message.movie_id))
 
+    redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
+    return result.model_dump()

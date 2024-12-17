@@ -6,8 +6,8 @@ from kombu import Queue
 import json
 
 from app.models.models import ElasticRequest
-from app.service.elastic_search import elastic_search, elastic_update_index
-from app.service.redis import RedisClient
+from app.services.elastic_search import elastic_search, elastic_update_index
+from app.services.redis import RedisClient
 from settings import (
     RMQ_PASSWORD,
     RMQ_USER,
@@ -44,7 +44,7 @@ redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB)
 
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='search_movie')
-def search_movie(message_data):
+def search_movie(message_data) -> dict:
     ''' 
         Calls elastic search with given query
         Returns ElasticResponse class
@@ -63,7 +63,7 @@ def search_movie(message_data):
 
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='update_index')
-def update_elastic_index():
+def update_elastic_index() -> None:
     '''
         Updates elastic-index 
     '''

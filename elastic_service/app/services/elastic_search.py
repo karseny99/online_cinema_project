@@ -1,4 +1,4 @@
-from app.service.elastic import ElasticSearch
+from app.services.elastic import ElasticSearch
 from pydantic import ValidationError
 from app.models.models import *
 

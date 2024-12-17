@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from typing import List, Optional
 import json 
 
-from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem
+from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem, MovieInfoResponse, MovieRequest
 from models.models import BaseContractModel
 # from rpc_client.rpc_client import send_task
 import service.movie_service
@@ -47,37 +47,37 @@ router = APIRouter()
 #         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/movies", response_model=list[dict])
-def get_all_movies(
-        limit: int = 10,
-        offset: int = 0,
-):
-    """
-    Эндпоинт для получения списка всех фильмов с поддержкой пагинации.
-    """
-    try:
+# @router.get("/movies", response_model=list[dict])
+# def get_all_movies(
+#         limit: int = 10,
+#         offset: int = 0,
+# ):
+#     """
+#     Эндпоинт для получения списка всех фильмов с поддержкой пагинации.
+#     """
+#     try:
 
-        movies = [
-            {"id": 1,
-             "title": "Star Wars. Episode 1",
-             "genres": "Fantasy|Science fiction"
-             },
-            {"id": 2,
-             "title": "Interstellar",
-             "genres": "Fantasy"
-             },
-        ]
-        return [
-            {
-                "id": movie["id"],
-                "title": movie["title"],
-                "genres": movie["genres"]
-            }
-            for movie in movies
-        ]
+#         movies = [
+#             {"id": 1,
+#              "title": "Star Wars. Episode 1",
+#              "genres": "Fantasy|Science fiction"
+#              },
+#             {"id": 2,
+#              "title": "Interstellar",
+#              "genres": "Fantasy"
+#              },
+#         ]
+#         return [
+#             {
+#                 "id": movie["id"],
+#                 "title": movie["title"],
+#                 "genres": movie["genres"]
+#             }
+#             for movie in movies
+#         ]
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 @router.get("/search", response_model=ElasticResponse)
@@ -110,3 +110,19 @@ def search_movies(
         return found_movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.get("/movies/{movie_id}", response_model=MovieItem)
+def get_movie_by_id(movie_id: int) -> MovieItem:
+    '''
+        Ручка для получения информации о фильме с данным movie_id
+    '''
+
+    # try:
+    request = MovieRequest(movie_id=movie_id)
+    movie: MovieInfoResponse = service.movie_service.get_movie_by_id(request)
+    movie = movie.movie
+
+    return movie
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

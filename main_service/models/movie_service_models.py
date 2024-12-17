@@ -21,6 +21,8 @@ class MovieItem(BaseModel):
     genres: Optional[List[str]]
     average_rating: Optional[float]
 
+class MovieInfoResponse(BaseModel):
+    movie: MovieItem
 
 class ElasticResponse(BaseModel):
     movies: List[MovieItem]
@@ -28,3 +30,6 @@ class ElasticResponse(BaseModel):
 
 class MovieInfoResponse(BaseModel):
     movie: MovieItem
+
+class MovieRequest(BaseModel):
+    movie_id: int
