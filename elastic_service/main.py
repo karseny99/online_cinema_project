@@ -3,6 +3,11 @@ import asyncio
 from celery import Celery
 from pydantic import BaseModel
 from kombu import Queue
+import json
+
+from app.models.models import ElasticRequest
+from app.service.elastic_search import elastic_search, elastic_update_index
+from app.service.redis import RedisClient
 from settings import (
     RMQ_PASSWORD,
     RMQ_USER,
@@ -10,10 +15,11 @@ from settings import (
     MQ_PORT,
     MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
     MQ_MESSAGE_TTL,
+    REDIS_HOST,
+    REDIS_PORT,
+    REDIS_PASSWORD,
+    REDIS_DB,
 )
-
-from app.models.models import ElasticRequest
-from app.service.elastic_search import elastic_search, elastic_update_index
 
 app = Celery(
     'tasks', 
@@ -34,10 +40,7 @@ app.conf.task_queues = (
     }),
 )
 
-
-class MessageModel(BaseModel):
-    text: str
-    sender: str
+redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB)
 
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='search_movie')
@@ -46,8 +49,16 @@ def search_movie(message_data):
         Calls elastic search with given query
         Returns ElasticResponse class
     '''
+
+    cache_key = f"search_movie:{json.dumps(message_data)}"
+    cached_result = redis_client.get(cache_key)
+    if cached_result:
+        return cached_result
+    
     message = ElasticRequest(**message_data)
     result = asyncio.run(elastic_search(message))
+
+    redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
     return result.model_dump()
 
 
