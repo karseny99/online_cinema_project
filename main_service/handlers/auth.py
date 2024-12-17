@@ -2,6 +2,8 @@ import http
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException, Response
+
+import service.auth_service
 from models.models import *
 from service.auth_service import *
 
@@ -10,71 +12,29 @@ router = APIRouter()
 
 @router.post("/register", response_model=RegisterResponse)
 def register(request: RegisterRequest, response: Response):
-    try:
-        auth_service = AuthService()
-        user_id = auth_service.register_user(
-            email=request.email,
-            username=request.username,
-            password=request.password,
-            role="viewer"
-        )
+    resp = service.auth_service.register_user(req=request)
 
-        resp = RegisterResponse(
-            request_id=request.request_id,
-            status=http.HTTPStatus.OK,
-            message="User registered successfully!",
-            user_id=str(user_id),
-        )
+    if resp.message == "registered successfully!":
         response.status_code = http.HTTPStatus.OK
-        return resp
-    except (UsernameExistsException, EmailExistsException) as e:
+    elif resp.message == "username already exists" or resp.message == "email already exists":
         response.status_code = http.HTTPStatus.BAD_REQUEST
-        return RegisterResponse(
-            request_id=request.request_id,
-            status=http.HTTPStatus.BAD_REQUEST,
-            message=str(e),
-            user_id=None
-        )
-    except Exception as e:
+    else:
         response.status_code = http.HTTPStatus.INTERNAL_SERVER_ERROR
-        return RegisterResponse(
-            request_id=request.request_id,
-            status=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            message=f"Internal server error: {str(e)}",
-            user_id=None
-        )
+
+    response.body = resp
+    return resp
 
 
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest, response: Response):
-    auth_service = AuthService()
-    try:
-        user = auth_service.authenticate_user(username=request.username, password=request.password)
-        if not user:
-            response.status_code = http.HTTPStatus.BAD_REQUEST
-            return LoginResponse(
-                request_id=request.request_id,
-                status=http.HTTPStatus.BAD_REQUEST,
-                message="Incorrect username or password!",
-                access_token="",
-                token_type=""
-            )
+    resp = service.auth_service.login_user(req=request)
 
-        access_token = auth_service.create_access_token(data={"sub": user.username})
+    response.body = resp
+    if resp.message == "user does not exist":
+        response.status_code = http.HTTPStatus.BAD_REQUEST
+    elif resp.message == "token created successfully!":
         response.status_code = http.HTTPStatus.OK
-        return LoginResponse(
-            request_id=request.request_id,
-            status=http.HTTPStatus.OK,
-            message="Login successful!",
-            access_token=access_token,
-            token_type="bearer"
-        )
-    except Exception as e:
+    else:
         response.status_code = http.HTTPStatus.INTERNAL_SERVER_ERROR
-        return LoginResponse(
-            request_id=request.request_id,
-            status=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-            message=f"An error occurred: {str(e)}",
-            access_token="",
-            token_type=""
-        )
+
+    return resp

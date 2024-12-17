@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr, constr
-from typing import Optional, Any
+from pydantic import BaseModel, constr, EmailStr
+from typing import Optional
 
 
 class RegisterRequest(BaseModel):

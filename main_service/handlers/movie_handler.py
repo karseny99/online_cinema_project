@@ -4,7 +4,6 @@ from typing import List, Optional
 import json 
 
 from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem, MovieInfoResponse, MovieRequest
-from models.models import BaseContractModel
 # from rpc_client.rpc_client import send_task
 import service.movie_service
 

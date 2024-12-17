@@ -10,6 +10,8 @@ from settings import (
     MQ_ROUTING_KEY_RPC_MOVIE_RESPONSE_QUEUE,
     MQ_ROUTING_KEY_RPC_USER_QUEUE,
     MQ_ROUTING_KEY_RPC_USER_RESPONSE_QUEUE,
+    MQ_ROUTING_KEY_RPC_AUTH_QUEUE,
+    MQ_ROUTING_KEY_RPC_AUTH_RESPONSE_QUEUE,
     MQ_MESSAGE_TTL,
 )
 
@@ -25,6 +27,10 @@ def declare_queues(channel):
     # Объявляем очереди для movie_service
     channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, durable=True, arguments=args)
     channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_MOVIE_RESPONSE_QUEUE, durable=True, arguments=args)
+
+    # Объявляем очереди для auth_service
+    channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_AUTH_QUEUE, durable=True, arguments=args)
+    channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_AUTH_RESPONSE_QUEUE, durable=True, arguments=args)
 
     # Объявляем очереди для user_service
     channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_USER_QUEUE, durable=True, arguments=args)
@@ -44,7 +50,7 @@ def main():
     connection.close()
 
 if __name__ == "__main__":
-    time.sleep(5)  # Ждем, чтобы RabbitMQ успел запуститься
+    time.sleep(8)  # Ждем, чтобы RabbitMQ успел запуститься
     main()
 
 

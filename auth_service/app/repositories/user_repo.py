@@ -1,8 +1,8 @@
 from datetime import datetime
 from sqlalchemy.orm.exc import NoResultFound
 
-from repositories.connector import *
-from repositories.models.user_model import User
+from app.repositories.connector import *
+from app.repositories.models.models import User
 
 class UserRepository:
     def __init__(self):
