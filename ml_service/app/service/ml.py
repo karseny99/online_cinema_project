@@ -19,7 +19,7 @@ class MLRecomendation:
         movies = get_movies(movies_path)
 
         # Создание матрицы пользователь-фильм
-        self.user_item_matrix = ratings.pivot(index='movie_id', columns='user_id', values='rating').fillna(0)
+        self.user_item_matrix = ratings.pivot(index='movie_id', columns='user_id', values='rating')
         self.user_item_matrix.fillna(0, inplace = True)
 
         # Отфильтровываем фильмы и пользователей с малым количеством оценок
@@ -33,7 +33,7 @@ class MLRecomendation:
 
         # Преобразование разреженной матрицы
         self.csr_data = csr_matrix(self.user_item_matrix.values)
-        self.user_item_matrix = self.user_item_matrix.rename_axis(None, axis = 1).reset_index() # нужна ли эта строка?
+        self.user_item_matrix = self.user_item_matrix.rename_axis(None, axis = 1).reset_index()
 
     def train_knn(self) -> None:
         """
