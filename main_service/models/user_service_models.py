@@ -11,3 +11,4 @@ class SetMovieRatingResponse(BaseModel):
     movie_id: int
     user_id: int
     success: bool
+    message: str

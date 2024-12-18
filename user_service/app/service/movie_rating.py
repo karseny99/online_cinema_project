@@ -1,3 +1,5 @@
+from pyexpat.errors import messages
+
 from app.repositories.movie_rating import MovieRatingRepository
 from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse
 import logging
@@ -17,10 +19,24 @@ class MovieRatingService:
             )
             if rating_id:
                 log.info(f"New rating: {req.rating} by user: {req.user_id} to movie: {req.movie_id}")
-                return SetMovieRatingResponse(user_id=req.user_id, movie_id=req.movie_id, success=True)
+                return SetMovieRatingResponse(
+                    user_id=req.user_id,
+                    movie_id=req.movie_id,
+                    success=True,
+                    message='ok'
+                )
             else:
                 log.error(f"Error: rating id is invalid: {rating_id}")
-                return SetMovieRatingResponse()
+                return SetMovieRatingResponse(
+                    user_id=req.user_id,
+                    movie_id=req.movie_id,
+                    success=False,
+                    message=f"Error: rating id is invalid: {rating_id}"
+                )
         except Exception as e:
-            print(f"Exception: {e}")
-            return SetMovieRatingResponse()
+            return SetMovieRatingResponse(
+                user_id=req.user_id,
+                movie_id=req.movie_id,
+                success=False,
+                message=e
+            )

@@ -8,7 +8,9 @@ from settings import (
     MQ_HOST,
     MQ_PORT,
     MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
-    MQ_MESSAGE_TTL, MQ_ROUTING_KEY_RPC_AUTH_QUEUE,
+    MQ_ROUTING_KEY_RPC_USER_QUEUE,
+    MQ_ROUTING_KEY_RPC_AUTH_QUEUE,
+    MQ_MESSAGE_TTL,
 )
 
 class RpcClient:
@@ -98,4 +100,7 @@ def get_auth_rpc_client() -> RpcClient:
     return RpcClient(MQ_ROUTING_KEY_RPC_AUTH_QUEUE)
 
 def get_user_rpc_client():
-    return 
+    '''
+            Returns rpc_client for user service
+    '''
+    return RpcClient(MQ_ROUTING_KEY_RPC_USER_QUEUE)
