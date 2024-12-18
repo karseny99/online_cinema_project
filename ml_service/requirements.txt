@@ -1,1 +1,4 @@
-# your modules here
+pandas
+numpy
+scikit-learn
+scipy
