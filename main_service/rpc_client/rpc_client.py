@@ -10,6 +10,7 @@ from settings import (
     MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
     MQ_ROUTING_KEY_RPC_USER_QUEUE,
     MQ_ROUTING_KEY_RPC_AUTH_QUEUE,
+    MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE,
     MQ_MESSAGE_TTL,
 )
 
@@ -86,6 +87,13 @@ class RpcClient:
         print(f'Task {function_name} sent without waiting for a response.')
 
 
+def get_elastic_rpc_client():
+    '''
+            Returns rpc_client for elastic service
+    '''
+    return RpcClient(MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE)
+
+
 def get_movie_rpc_client() -> RpcClient:
     '''
         Returns rpc_client for movie's service
@@ -99,8 +107,10 @@ def get_auth_rpc_client() -> RpcClient:
     '''
     return RpcClient(MQ_ROUTING_KEY_RPC_AUTH_QUEUE)
 
+
 def get_user_rpc_client():
     '''
             Returns rpc_client for user service
     '''
     return RpcClient(MQ_ROUTING_KEY_RPC_USER_QUEUE)
+

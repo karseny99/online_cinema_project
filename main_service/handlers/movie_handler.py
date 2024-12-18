@@ -6,6 +6,7 @@ import json
 from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem, MovieInfoResponse, MovieRequest
 # from rpc_client.rpc_client import send_task
 import service.movie_service
+import service.elastic_service
 
 router = APIRouter()
 
@@ -105,7 +106,7 @@ def search_movies(
             page_size=page_size
         )
 
-        found_movies = service.movie_service.search_movies(request) 
+        found_movies = service.elastic_service.search_movies(request) 
         return found_movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

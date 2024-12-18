@@ -31,9 +31,3 @@ async def read_root(request: Request):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
-
-# from models.movie_service_models import BaseContractModel, ElasticRequest
-# from rpc_client.rpc_client import get_movie_rpc_client
-# if __name__ == "__main__":
-#     rpc_client = get_movie_rpc_client()
-#     rpc_client.call(BaseContractModel("search_request", ElasticRequest()))

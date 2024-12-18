@@ -1,7 +1,5 @@
 
-import asyncio
 from celery import Celery
-from pydantic import BaseModel
 from kombu import Queue
 import json
 
@@ -13,7 +11,7 @@ from settings import (
     RMQ_USER,
     MQ_HOST,
     MQ_PORT,
-    MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
+    MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE,
     MQ_MESSAGE_TTL,
     REDIS_HOST,
     REDIS_PORT,
@@ -25,13 +23,13 @@ app = Celery(
     'tasks', 
     broker=f'pyamqp://{RMQ_USER}:{RMQ_PASSWORD}@{MQ_HOST}:{MQ_PORT}//', 
     backend='rpc://',
-    queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE,
+    queue=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE,
 )
 
 app.conf.worker_prefetch_multiplier = 1 # Воркер будет брать одну задачу за раз
 app.conf.task_queues = (
-    Queue(MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, 
-    routing_key=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, 
+    Queue(MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, 
+    routing_key=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, 
     queue_arguments=
     {
         'x-message-ttl': MQ_MESSAGE_TTL,
@@ -43,7 +41,7 @@ app.conf.task_queues = (
 redis_client = RedisClient(REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB)
 
 
-@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='search_movie')
+@app.task(queue=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, name='search_movie')
 def search_movie(message_data) -> dict:
     ''' 
         Calls elastic search with given query
@@ -56,15 +54,15 @@ def search_movie(message_data) -> dict:
         return cached_result
     
     message = ElasticRequest(**message_data)
-    result = asyncio.run(elastic_search(message))
+    result = elastic_search(message)
 
     redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
     return result.model_dump()
 
 
-@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='update_index')
+@app.task(queue=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, name='update_index')
 def update_elastic_index() -> None:
     '''
         Updates elastic-index 
     '''
-    asyncio.run(elastic_update_index())
+    elastic_update_index()
