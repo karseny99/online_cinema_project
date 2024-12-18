@@ -1,9 +1,9 @@
-import app.service.MLRecomendation
+import service.ml as ml_service
 
+if __name__ == "__main__":
+    recommendation_system = ml_service.MLRecomendation()
 
-'''
-    Calling for class-functions here
-'''
+    relevance_matrix = recommendation_system.run_recommendation_pipeline()
 
-if __name__ == "__main__":  
-    pass
+    relevance_matrix.to_csv("relevance_matrix.csv", index=True) # сохранение файла
+    # print(relevance_matrix.head())

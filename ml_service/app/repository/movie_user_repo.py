@@ -1,16 +1,20 @@
-'''
-    Get all data from csv here in functions
-'''
+import pandas as pd
+import numpy as np
 
-# example 
-def get_ratings() -> np.array:
-    '''
-        Returns rating table
-    '''
+def get_ratings(ratings_path: str, max_rows: int = 1000000) -> pd.DataFrame:
+    """
+    Загружает и подготавливает таблицу рейтингов.
+    """
+    df = pd.read_csv(ratings_path, nrows=max_rows)
+    df.rename(columns={'userId': 'user_id', 'movieId': 'movie_id'}, inplace=True)
+    df.drop(['timestamp'], axis=1, inplace=True)
+    return df
 
-    rating_df = pd.read_csv("your_path.csv")
-
-    # Renaming data here
-    ...
-
-    return rating_df
+def get_movies(movies_path: str) -> pd.DataFrame:
+    """
+    Загружает и подготавливает таблицу фильмов.
+    """
+    df = pd.read_csv(movies_path)
+    df.rename(columns={'movieId': 'movie_id', 'title': 'title'}, inplace=True)
+    df.drop(['genres'], axis=1, inplace=True)
+    return df
