@@ -9,17 +9,15 @@ from service.user_service import set_rating
 router = APIRouter()
 log = logging.getLogger(__name__)
 
+
 @router.post("/set-rating", response_model=SetMovieRatingResponse)
 def set_movie_rating(
         req: SetMovieRatingRequest,
         response: Response,
         current_user: dict = Depends(get_current_user)
 ):
-
-    username = current_user["sub"]
-    print(f"Hello, {username}!")
-    print(f"Requested user_id: {req.user_id}")
-
+    user_id = current_user["sub"]
+    req.user_id = user_id # вытягиваем из токена фактический user_id
     resp = set_rating(req=req)
 
     if resp is None:
@@ -37,4 +35,3 @@ def set_movie_rating(
     else:
         response.status_code = http.HTTPStatus.BAD_REQUEST
     return resp
-

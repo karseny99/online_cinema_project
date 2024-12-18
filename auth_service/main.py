@@ -81,7 +81,11 @@ def login_user(message_data):
             message="user does not exist"
         ).json()
 
-    access_token = auth.create_access_token(data={"sub": result.username})
+    access_token = auth.create_access_token(
+        data={
+            "sub": str(result.user_id)
+        }
+    )
 
     return LoginResponse(
         access_token=access_token,
