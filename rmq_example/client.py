@@ -17,7 +17,7 @@ app = Celery('client',
     # tasks_routes={"tasks.process_message", MQ_ROUTING_KEY_RPC_MOVIE_QUEUE},
 )
 
-# настройка для исполбзуемой очереди
+# настройка для используемой очереди
 # app.conf.task_queues = (
 #     Queue(MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, routing_key=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, queue_arguments={
 #         'x-message-ttl': MQ_MESSAGE_TTL,

@@ -1,3 +1,5 @@
+from wsgiref.util import request_uri
+
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -15,12 +17,11 @@ app = FastAPI()
 app.add_middleware(JWTMiddleware)
 
 templates = Jinja2Templates(directory="../frontend/templates")
-# app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory="../frontend/templates/static"), name="static")
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(movie_router, prefix="/api", tags=["movies catalog"])
 app.include_router(user_router, prefix="/api", tags=["set movie rating"])
-# TODO: other routes
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -37,6 +38,15 @@ async def read_search(request: Request):
 @app.get("/movies/{movie_id}", response_class=HTMLResponse)
 async def movie_detail_page(movie_id: int, request: Request):
     return templates.TemplateResponse("movie_detail.html", {"request": request, "movie_id": movie_id})
+
+@app.get("/auth/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request":  request})
+
+@app.get("/auth/login", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request":  request})
+
 
 # Обработчик для всех других несуществующих маршрутов
 @app.get("/{full_path:path}", response_class=HTMLResponse)
