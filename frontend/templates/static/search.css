@@ -1,4 +1,4 @@
-/* Общий стиль для форм */
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
@@ -7,6 +7,12 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
 }
 
 .form-container {
@@ -18,12 +24,6 @@ body {
     max-width: 400px;
     margin: 20px;
     margin-bottom: 20px;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
 }
 
 form {
@@ -83,4 +83,43 @@ a:hover {
     text-decoration: underline;
 }
 
+#results {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
+.movie {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: box-shadow 0.3s;
+}
+
+.movie:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pagination-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.select2-container--default .select2-selection--multiple {
+    height: 38px; /* Установите желаемую высоту */
+}
+
+#results {
+    clear: both;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
