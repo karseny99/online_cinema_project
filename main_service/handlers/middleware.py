@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
@@ -5,23 +7,30 @@ from core.config import settings
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
+log = logging.getLogger(__name__)
 
 class JWTMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: FastAPI):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in ["/auth/login", "/auth/register"]:  # Список эндпоинтов, которые не требуют проверки
+        log.info(f"Request URL: {request.url}")
+        log.info(f"Cookies in request: {request.cookies}")
+        if request.url.path in [
+            "/auth/login",
+            "/auth/register",
+            "/static/styles.css",
+            "/favicon.ico",
+        ]:
             return await call_next(request)
 
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
+        token = request.cookies.get("jwt_token")
+        log.info(f"middleware: token got: {request.cookies.get("jwt_token")}")
+        if not token:
             return JSONResponse(
                 status_code=401,
-                content={"detail": "Authorization header missing or invalid"}
+                content={"detail": "Authorization token missing"}
             )
-
-        token = auth_header.split(" ")[1]
 
         try:
             payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
