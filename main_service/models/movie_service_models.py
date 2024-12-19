@@ -31,3 +31,7 @@ class MovieInfoResponse(BaseModel):
 
 class MovieRequest(BaseModel):
     movie_id: int
+
+class GenresResponse(BaseModel):
+    genres: List[str]
+    success: bool

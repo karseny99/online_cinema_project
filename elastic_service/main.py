@@ -49,6 +49,7 @@ def search_movie(message_data) -> dict:
     '''
     try:
         cache_key = f"search_movie:{json.dumps(message_data)}"
+        print(f"received query {cache_key}")
         cached_result = redis_client.get(cache_key)
         if cached_result:
             return cached_result

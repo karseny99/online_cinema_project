@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from kombu import Queue
 import json
 
-from app.models.models import MovieRequest, MovieInfoResponse
+from app.models.models import MovieRequest, MovieInfoResponse, GenresResponse
 from app.services.movie_service import MovieService
 from app.services.redis import RedisClient
 from settings import (
@@ -64,4 +64,25 @@ def get_movie_info(message_data):
     except Exception as e:
         print(f"Exception occured: {e}")
         return MovieInfoResponse(movie=None, success=False).model_dump()
+
+
+@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='get_distinct_genres')
+def get_distinct_genres():
+    ''' 
+        Calls elastic search with given query
+        Returns ElasticResponse class
+    '''
+
+    try:
+        cache_key = f"get_distinct_genres:"
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return cached_result
+       
+        result = MovieService.get_distinct_genres()
+        redis_client.set(cache_key, result.model_dump(), 24 * 3600) # 24 hours cache's life
+        return result.model_dump()
+    except Exception as e:
+        print(f"Exception occured: {e}")
+        return GenresResponse(genres=None, success=False).model_dump()
 

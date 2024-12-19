@@ -1,0 +1,79 @@
+body {
+    font-family: 'PT Sans Caption', serif; 
+    background-color: #F7FFF7;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #030303;
+}
+
+form {
+    background: #cfcfcf;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+label {
+    color: #2F3061;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc; /* Измените цвет рамки, если нужно */
+    border-radius: 4px;
+    background-color: #F7FFF7; /* Цвет фона полей */
+    font-size: 16px;
+}
+
+button {
+    background-color: #bfbfbf; /* Измените цвет кнопки на желаемый */
+    color: 030303;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #c4c4c4; /* Цвет кнопки при наведении */
+    color: #253a44;
+    transform: scale(1.005);
+}
+
+#results {
+    margin-top: 20px;
+}
+
+.movie {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.movie h3 {
+    margin: 0;
+}
+
+.movie p {
+    margin: 5px 0;
+}
+
+/* Остальные стили остаются без изменений */

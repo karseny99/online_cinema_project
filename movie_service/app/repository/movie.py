@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-
+from sqlalchemy import distinct
 from app.repository.database import *
-from app.repository.models import MoviesWithInfo
+from app.repository.models import MoviesWithInfo, Genre
 
 
 @connection
@@ -17,10 +17,10 @@ def get_movie_by_id(session, movie_id: int) -> MoviesWithInfo:
     return movies
 
 
-# @connection
-# async def get_movies_by_id_range(session, start_id: int):
-#     '''
-#         Returns list of movies from range: start_id + 1 till the end
-#     '''
-#     result = await session.execute(select(MovieWithInfo).where(MovieWithInfo.movie_id > start_id))
-#     return result.scalars().all()
+@connection
+def get_distinct_genres(session) -> list[str]:
+    '''
+        Returns distinct genre's names
+    '''
+    genres = session.execute(select(distinct(Genre.name)))
+    return [row[0] for row in genres]

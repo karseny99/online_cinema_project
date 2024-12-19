@@ -29,7 +29,7 @@ class RedisClient:
             # Проверка кэша
             cached_result = self.redis_client.get(cache_key)
             if cached_result:
-                print(f"Found in cache, returning {cached_result}")
+                print(f"Found in cache, returning {cache_key}")
                 return json.loads(cached_result)  # Возвращаем результат из кэша
             print(f"Cached value not found: {cache_key}")
         except redis.ConnectionError:

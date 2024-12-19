@@ -1,4 +1,4 @@
-from models.movie_service_models import ElasticRequest, ElasticResponse, MovieRequest, MovieInfoResponse
+from models.movie_service_models import MovieRequest, MovieInfoResponse, GenresResponse
 from rpc_client.rpc_client import get_movie_rpc_client
 
 def get_movie_by_id(request: MovieRequest) -> MovieInfoResponse:
@@ -13,4 +13,19 @@ def get_movie_by_id(request: MovieRequest) -> MovieInfoResponse:
         return MovieInfoResponse(movie=None, success=False)
     
     result = MovieInfoResponse(**result)
+    return result
+
+def get_distinct_genres() -> GenresResponse:
+    '''
+        Requests movie-genres in database
+    '''
+
+    search_function_name = "get_distinct_genres"
+    print("HERE")
+    result = get_movie_rpc_client().send_task(search_function_name)
+
+    if not result:
+        return GenresResponse(genres=None, success=False)
+    
+    result = GenresResponse(**result)
     return result

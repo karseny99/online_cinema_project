@@ -4,7 +4,7 @@ from typing import Optional, List, Any
 class ElasticRequest(BaseModel):
     title: Optional[str]
     year: Optional[int]
-    genre: Optional[List[str]] 
+    genre: Optional[List[Optional[str]]] 
     director: Optional[str]
     page: Optional[int]
     page_size: Optional[int]

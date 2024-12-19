@@ -219,11 +219,28 @@ class ElasticSearch:
             })
 
         if "genre" in query:
-            es_query["query"]["bool"]["filter"].append({
-                "terms": {
-                    "genres.keyword": query["genre"]
+            # Создаем фильтр для жанров
+            genre_filter = {
+                "bool": {
+                    "must": [
+                        {
+                            "terms": {
+                                "genres.keyword": query["genre"]
+                            }
+                        }
+                    ],
+                    "should": [
+                        {
+                            "terms": {
+                                "genres.keyword": query["genre"]
+                            }
+                        }
+                    ],
+                    "minimum_should_match": 1  # хотя бы один жанр из запроса присутствует
                 }
-            })
+            }
+            es_query["query"]["bool"]["filter"].append(genre_filter)
+
 
         if "director" in query:
             es_query["query"]["bool"]["filter"].append({

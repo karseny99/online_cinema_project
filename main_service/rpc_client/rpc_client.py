@@ -49,23 +49,23 @@ class RpcClient:
         dead_letter_queue = Queue('rpc.dlx', dlx_exchange, routing_key='rpc_dlq')
         self.app.conf.task_queues = (default_queue, dead_letter_queue)
 
-    def send_task(self, function_name: str, request: BaseModel) -> BaseModel:
+    def send_task(self, function_name: str, request: BaseModel = None) -> BaseModel:
         '''
             Sends task to movie's service
             Returns Response, None if timed out 
         '''
-
+        args = [request.model_dump()] if request is not None else []
         # Отправка сообщения через RPC
         result = self.app.send_task(
             function_name, # Название функции в сервисе (tasks - имя файла, process_message - название функции)
-            args=[request.model_dump()],
+            args=args,
             queue=self.routing_key,    
         )
 
         # Получение результата
         try:
             response = result.get(timeout=10)  # Ожидание результата до 10 секунд + пришлет именно тому, кто запрашивал, corr_id не нужен
-            print('Response:', response)
+            # print('Response:', response)
             return response
         except Exception as e:
             print(f"An error occurred: {e}")

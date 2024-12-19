@@ -1,53 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Movies</title>
-    <link rel="stylesheet" href="/static/styles.css"> <!-- Подключите ваши стили -->
-</head>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Поиск фильмов</title>
+        <link rel="stylesheet" href="/static/styles.css"> 
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=PT+Sans+Caption:wght@400;700&display=swa" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    </head>
 <body>
-    <h1>Search Movies</h1>
+    <h1>Поиск фильмов</h1>
     <form id="searchForm">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title"><br><br>
+        <label for="title">Название</label>
+        <input type="text" id="title" name="title">
 
-        <!-- <label for="year">Year:</label>
-        <input type="number" id="year" name="year"><br><br>
+        <label for="year">Год</label>
+        <input type="number" id="year" name="year" min="1888" max="2100">
 
-        <label for="genre">Genre:</label>
-        <input type="text" id="genre" name="genre"><br><br>
+        <label for="genre">Жанр</label>
+        <select id="genre" name="genre" multiple>
+            <!-- Жанры будут добавлены здесь динамически -->
+        </select><br><br>
 
-        <label for="director">Director:</label>
-        <input type="text" id="director" name="director"><br><br> -->
-
-        <button type="submit">Search</button>
+        <button type="submit">Поиск</button>
     </form>
 
     <div id="results"></div>
 
-    <script>
-        document.getElementById('searchForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Предотвращаем стандартное поведение формы
+    <div id="pagination">
+        <button id="prevPage" disabled><<</button>
+        <button id="nextPage">>></button>
+    </div>
 
+    <script>
+        // Функция для загрузки жанров
+        async function loadGenres() {
+            try {
+                const response = await fetch('/api/genres');
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке жанров');
+                }
+                const data = await response.json();
+
+                const genreSelect = document.getElementById('genre');
+
+                // Добавляем жанры в селектор
+                data.genres.forEach(genre => {
+                    const option = document.createElement('option');
+                    option.value = genre;
+                    option.textContent = genre;
+                    genreSelect.appendChild(option);
+                });
+
+                // Инициализируем Select2
+                $(genreSelect).select2({
+                    placeholder: "Выберите жанры",
+                    allowClear: true
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Загружаем жанры при загрузке страницы
+        window.onload = loadGenres;
+
+        let currentPage = 1; // Текущая страница
+        const pageSize = 10; // Количество элементов на странице
+
+        async function performSearch() {
             const titleInput = document.getElementById('title');
             const title = titleInput.value.trim(); // Убираем пробелы
 
-            // Проверка на пустое значение
-            if (!title) {
-                const resultsDiv = document.getElementById('results');
-                resultsDiv.innerHTML = '<p style="color: red;">Поле "Title" не должно быть пустым.</p>';
-                return; // Прекращаем выполнение, если поле пустое
+            const yearInput = document.getElementById('year').value;
+            const genreSelect = document.getElementById('genre');
+            const selectedGenres = Array.from(genreSelect.selectedOptions).map(option => option.value);
+
+            // Создаем объект URLSearchParams
+            const params = new URLSearchParams();
+
+            // Добавляем параметры только если они не пустые
+            if (title) {
+                params.append('title', title);
             }
             
-            const formData = new FormData(this);
-            const params = new URLSearchParams(formData).toString();
+            if (yearInput) {
+                params.append('year', yearInput);
+            }
+            
+            if (selectedGenres.length > 0) {
+                params.append('genre', selectedGenres.join(',')); // Объединяем жанры в строку, разделенную запятыми
+            }
+
+            // Добавляем параметры пагинации
+            params.append('page', currentPage);
+            params.append('page_size', pageSize);
+
             try {
-                const response = await fetch(`/api/search?${params}`);
+                const response = await fetch(`/api/search?${params.toString()}`);
                 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Unknown error occurred');
+                    throw new Error(errorData.detail || 'Произошла неизвестная ошибка');
                 }
 
                 const data = await response.json();
@@ -59,21 +115,92 @@
                 if (data.movies && data.movies.length > 0) {
                     data.movies.forEach(movie => {
                         const movieDiv = document.createElement('div');
+                        movieDiv.className = 'movie'; // Добавляем класс для стилизации
                         movieDiv.innerHTML = `<h3><a href="/movies/${movie.movie_id}">${movie.movie_title} (${movie.year})</a></h3>
-                                            <p>Director: ${movie.director}</p>
-                                            <p>Rating: ${movie.average_rating}</p>
-                                            <p>Description: ${movie.description || 'N/A'}</p>`;
+                                            <p>Режиссер: ${movie.director}</p>
+                                            <p>Рейтинг: ${movie.average_rating}</p>
+                                            <p>Описание: ${movie.description || 'N/A'}</p>`;
                         resultsDiv.appendChild(movieDiv);
                     });
                 } else {
-                    resultsDiv.innerHTML = '<p>No movies found.</p>';
+                    resultsDiv.innerHTML = '<p>Фильмы не найдены.</p>';
                 }
+
+                // Обновляем состояние кнопок пагинации
+                updatePagination(data.movies.length); // Проверяем, есть ли фильмы на текущей странице
             } catch (error) {
                 // Обработка ошибки
                 const resultsDiv = document.getElementById('results');
                 resultsDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
             }
+        }
+
+        // Функция для проверки полей поиска
+        function areSearchFieldsEmpty() {
+            const titleInput = document.getElementById('title').value.trim();
+            const yearInput = document.getElementById('year').value;
+            const genreSelect = document.getElementById('genre');
+            const selectedGenres = Array.from(genreSelect.selectedOptions).map(option => option.value);
+
+            return !titleInput && !yearInput && selectedGenres.length === 0;
+        }
+
+
+        // Обновляем состояние кнопок пагинации
+        function updatePagination(moviesCount) {
+            const paginationDiv = document.getElementById('pagination');
+            const isEmpty = areSearchFieldsEmpty();
+
+            // Деактивируем кнопки, если поля пустые
+            if (isEmpty) {
+                paginationDiv.style.display = 'none'; // Скрываем кнопки пагинации
+            } else {
+                paginationDiv.style.display = 'block'; // Показываем кнопки пагинации
+                document.getElementById('prevPage').disabled = currentPage === 1; // Деактивируем кнопку "Предыдущая", если на первой странице
+                document.getElementById('nextPage').disabled = moviesCount < pageSize; // Деактивируем кнопку "Следующая", если меньше 10 фильмов
+            }
+        }
+
+        // Обработчик события для кнопки "Поиск"
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы
+            currentPage = 1; // Сбрасываем номер страницы при новом поиске
+
+            // Проверяем, что хотя бы одно поле заполнено
+            if (areSearchFieldsEmpty()) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<p style="color: red;">Заполните хотя бы одно поле для поиска</p>';
+                return; // Прерываем выполнение, если все поля пустые
+            }
+
+            await performSearch(); // Выполняем поиск
         });
+
+
+        // Обработчик события для кнопок пагинации
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--; // Уменьшаем номер текущей страницы
+                performSearch(); // Выполняем поиск с обновленным номером страницы
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Плавная прокрутка вверх
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (!areSearchFieldsEmpty()) { // Проверяем, что поля не пустые
+                currentPage++; // Увеличиваем номер текущей страницы
+                performSearch(); // Выполняем поиск с обновленным номером страницы
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Плавная прокрутка вверх
+            }
+        });
+
+        // Обработчик события для изменения жанра
+        document.getElementById('genre').addEventListener('change', async function() {
+            currentPage = 1; // Сбрасываем номер страницы при изменении жанра
+            await performSearch(); // Выполняем поиск при изменении жанра
+        });
+
     </script>
 </body>
 </html>
+
