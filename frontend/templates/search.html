@@ -4,69 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Movies</title>
-    <link rel="stylesheet" href="/static/styles.css"> <!-- Подключите ваши стили -->
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>Search Movies</h1>
-    <form id="searchForm">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title"><br><br>
+    <!-- Шапка с заголовком -->
+    <header>
+        <h1>Search Movies</h1>
+    </header>
 
-        <!-- <label for="year">Year:</label>
-        <input type="number" id="year" name="year"><br><br>
+    <!-- Контейнер для поиска -->
+    <div class="search-container">
+        <form id="searchForm">
+            <input type="text" id="title" name="title" placeholder="Enter movie title...">
+            <button type="submit">Search</button>
+        </form>
+    </div>
 
-        <label for="genre">Genre:</label>
-        <input type="text" id="genre" name="genre"><br><br>
+    <!-- Контейнер для результатов -->
+    <div class="results-container" id="results"></div>
 
-        <label for="director">Director:</label>
-        <input type="text" id="director" name="director"><br><br> -->
-
-        <button type="submit">Search</button>
-    </form>
-
-    <div id="results"></div>
-
+    <!-- JavaScript -->
     <script>
         document.getElementById('searchForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Предотвращаем стандартное поведение формы
-        
+            event.preventDefault();
+
             const titleInput = document.getElementById('title');
-            const title = titleInput.value.trim(); // Убираем пробелы
-        
-            // Проверка на пустое значение
+            const title = titleInput.value.trim();
+
             if (!title) {
                 const resultsDiv = document.getElementById('results');
-                resultsDiv.innerHTML = '<p style="color: red;">Поле "Title" не должно быть пустым.</p>';
-                return; // Прекращаем выполнение, если поле пустое
+                resultsDiv.innerHTML = '<p style="color: red; text-align: center;">Поле "Title" не должно быть пустым.</p>';
+                return;
             }
-        
+
             const formData = new FormData(this);
             const params = new URLSearchParams(formData).toString();
-        
+
             const response = await fetch(`/api/search?${params}`);
             const data = await response.json();
-        
-            // Обработка результатов
+
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = ''; // Очищаем предыдущие результаты
-        
+            resultsDiv.innerHTML = '';
+
             if (response.ok) {
                 if (data.movies && data.movies.length > 0) {
                     data.movies.forEach(movie => {
                         const movieDiv = document.createElement('div');
-                        // Создаем кликабельное название фильма с использованием movie_id
-                        movieDiv.innerHTML = `<h3><a href="/movies/${movie.movie_id}">${movie.movie_title} (${movie.year})</a></h3>
-                                              <p>Director: ${movie.director}</p>
-                                              <p>Rating: ${movie.average_rating}</p>
-                                              <p>Description: ${movie.description || 'N/A'}</p>`;
+                        movieDiv.classList.add('movie-item');
+
+                        // Создаём HTML для фильма с проверкой на пустые поля
+                        let movieHTML = `
+                            <h3><a href="/movies/${movie.movie_id}">${movie.movie_title} (${movie.year})</a></h3>
+                        `;
+
+                        // Добавляем информацию о режиссёре, если она есть
+                        if (movie.director) {
+                            movieHTML += `<p><strong>Director:</strong> ${movie.director}</p>`;
+                        }
+
+                        // Добавляем рейтинг, если он есть
+                        if (movie.average_rating) {
+                            movieHTML += `<p><strong>Rating:</strong> ${movie.average_rating}</p>`;
+                        }
+
+                        // Добавляем описание, если оно есть
+                        if (movie.description) {
+                            movieHTML += `<p><strong>Description:</strong> ${movie.description}</p>`;
+                        }
+
+                        movieDiv.innerHTML = movieHTML;
                         resultsDiv.appendChild(movieDiv);
                     });
                 } else {
-                    resultsDiv.innerHTML = '<p>No movies found.</p>';
+                    resultsDiv.innerHTML = '<p style="text-align: center;">No movies found.</p>';
                 }
             } else {
-                // Обработка ошибки
-                resultsDiv.innerHTML = `<p style="color: red;">${data.detail}</p>`;
+                resultsDiv.innerHTML = `<p style="color: red; text-align: center;">${data.detail}</p>`;
             }
         });
     </script>
