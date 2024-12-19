@@ -107,6 +107,8 @@ def search_movies(
         )
 
         found_movies = service.elastic_service.search_movies(request) 
+        if not found_movies.success:
+            raise HTTPException(status_code=503, detail="Something went wrong. Please try again later.")
         return found_movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
@@ -118,11 +120,24 @@ def get_movie_by_id(movie_id: int) -> MovieItem:
         Ручка для получения информации о фильме с данным movie_id
     '''
 
-    # try:
-    request = MovieRequest(movie_id=movie_id)
-    movie: MovieInfoResponse = service.movie_service.get_movie_by_id(request)
-    movie = movie.movie
-
-    return movie
+    try:
+        request = MovieRequest(movie_id=movie_id)
+        movie: MovieInfoResponse = service.movie_service.get_movie_by_id(request)
+        if not movie.success:
+            raise HTTPException(status_code=503, detail="Something went wrong. Please try again later.")
+        
+        # Movie not found
+        if movie.movie is None:
+            raise HTTPException(status_code=404, detail="Фильм не найден.")
+        
+        return movie.movie
+    except ValueError as ve:
+        # Пример обработки специфичной ошибки
+        raise HTTPException(status_code=400, detail=f"Некорректный запрос: {str(ve)}")
+    # except SomeSpecificException as se:
+    #     # Обработка других специфичных исключений
+    #     raise HTTPException(status_code=500, detail=f"Ошибка сервиса: {str(se)}")
     # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    #     # Логирование и возврат 500 для всех остальных ошибок
+    #     print(str(e))  # Здесь можно использовать логирование
+    #     raise HTTPException(status_code=500, detail="Произошла ошибка на сервере.")

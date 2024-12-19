@@ -3,7 +3,7 @@ from celery import Celery
 from kombu import Queue
 import json
 
-from app.models.models import ElasticRequest
+from app.models.models import ElasticRequest, ElasticResponse
 from app.services.elastic_search import elastic_search, elastic_update_index
 from app.services.redis import RedisClient
 from settings import (
@@ -47,17 +47,20 @@ def search_movie(message_data) -> dict:
         Calls elastic search with given query
         Returns ElasticResponse class
     '''
+    try:
+        cache_key = f"search_movie:{json.dumps(message_data)}"
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        message = ElasticRequest(**message_data)
+        result = elastic_search(message)
 
-    cache_key = f"search_movie:{json.dumps(message_data)}"
-    cached_result = redis_client.get(cache_key)
-    if cached_result:
-        return cached_result
-    
-    message = ElasticRequest(**message_data)
-    result = elastic_search(message)
-
-    redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
-    return result.model_dump()
+        redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
+        return result.model_dump()
+    except Exception as e:
+        print(f"Exception occured: {e}")
+        return ElasticResponse(movies=[], success=False).model_dump()
 
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, name='update_index')

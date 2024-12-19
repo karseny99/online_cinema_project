@@ -23,7 +23,21 @@ def elastic_search(query: ElasticRequest) -> ElasticResponse:
     finally:
         es_client.close()
 
-    results = ElasticResponse(movies=[MovieItem(**movie) for movie in results])
+    results = ElasticResponse(movies=[
+        MovieItem(
+            movie_id=movie.get('movie_id'),
+            movie_title=movie.get('movie_title'),
+            year=movie.get('year'),
+            director=movie.get('director'),
+            description=movie.get('description'),
+            info_title=movie.get('info_title'),
+            genres=movie.get('genres'),  # Проверка на список
+            average_rating=movie.get('average_rating')
+        ) for movie in results
+        ],
+        success=True
+    )
+
     # Вывод результатов
     print("Found movie IDs:", results)
     

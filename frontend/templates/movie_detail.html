@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Details</title>
+    <link rel="stylesheet" href="/static/styles.css"> <!-- Подключите ваши стили -->
+</head>
+<body>
+    <div id="movieDetails"></div>
+
+    <script>
+        // Получаем movie_id из переменной, переданной в шаблон
+        const movieId = {{ movie_id }};
+
+        async function fetchMovieDetails() {
+            try {
+                const response = await fetch(`/api/movies/${movieId}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Фильм не найден.');
+                    } else {
+                        throw new Error('Ошибка при загрузке данных о фильме');
+                    }
+                }
+                const movie = await response.json();
+
+                // Отображение информации о фильме
+                const movieDetailsDiv = document.getElementById('movieDetails');
+                movieDetailsDiv.innerHTML = `
+                    <h1>${movie.movie_title} (${movie.year})</h1>
+                    <h2>Режиссер: ${movie.director}</h2>
+                    <h3>Жанры: ${movie.genres.join(', ')}</h3>
+                    <h3>Средний рейтинг: ${movie.average_rating}</h3>
+                    <h3>Описание: ${movie.description || 'Нет описания'}</h3>
+                `;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('movieDetails').innerHTML = `<p style="color: red;">${error.message}</p>`;
+            }
+        }
+
+
+        // Вызов функции для загрузки данных о фильме
+        fetchMovieDetails();
+    </script>
+</body>
+</html>

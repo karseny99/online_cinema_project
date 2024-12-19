@@ -5,13 +5,17 @@ def search_movies(request: ElasticRequest) -> ElasticResponse:
     '''
         sends task to get movies by given requests
         Returns ElasticResponse-class 
-        Returns None if timed out
+        Returns unsuccess ElasticResponse-class if timed out
     '''
     search_function_name = "search_movie"
 
     rpc_client = get_elastic_rpc_client()
     
     result = rpc_client.send_task(search_function_name, request)
+
+    if not result:
+        return ElasticResponse(movies=[], success=False)
+    
     result = ElasticResponse(**result)
     return result
 

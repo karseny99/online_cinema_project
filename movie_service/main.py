@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from kombu import Queue
 import json
 
-from app.models.models import MovieRequest
+from app.models.models import MovieRequest, MovieInfoResponse
 from app.services.movie_service import MovieService
 from app.services.redis import RedisClient
 from settings import (
@@ -50,14 +50,18 @@ def get_movie_info(message_data):
         Returns ElasticResponse class
     '''
 
-    cache_key = f"get_movie_info:{json.dumps(message_data)}"
-    cached_result = redis_client.get(cache_key)
-    if cached_result:
-        return cached_result
-    
-    message = MovieRequest(**message_data)
+    try:
+        cache_key = f"get_movie_info:{json.dumps(message_data)}"
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        message = MovieRequest(**message_data)
 
-    result = MovieService.get_movie_by_id(message.movie_id)
+        result = MovieService.get_movie_by_id(message.movie_id)
+        redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
+        return result.model_dump()
+    except Exception as e:
+        print(f"Exception occured: {e}")
+        return MovieInfoResponse(movie=None, success=False).model_dump()
 
-    redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
-    return result.model_dump()

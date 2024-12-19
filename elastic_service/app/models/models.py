@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, Field
 from typing import Optional, List, Any
 
 class ElasticRequest(BaseModel):
@@ -17,11 +17,11 @@ class MovieItem(BaseModel):
     director: Optional[str]
     description: Optional[str]
     info_title: Optional[str]
-    genres: Optional[List[str]]
+    genres: Optional[List[Optional[str]]]
     average_rating: Optional[float]
 
 
 class ElasticResponse(BaseModel):
     movies: List[MovieItem]
-
+    success: bool
 

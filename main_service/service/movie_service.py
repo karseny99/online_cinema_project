@@ -7,8 +7,10 @@ def get_movie_by_id(request: MovieRequest) -> MovieInfoResponse:
     '''
 
     search_function_name = "get_movie_info"
-    print("sending request for movie")
     result = get_movie_rpc_client().send_task(search_function_name, request)
 
+    if not result:
+        return MovieInfoResponse(movie=None, success=False)
+    
     result = MovieInfoResponse(**result)
     return result

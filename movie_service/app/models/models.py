@@ -9,7 +9,7 @@ class MovieItem(BaseModel):
     director: Optional[str]
     description: Optional[str]
     info_title: Optional[str]
-    genres: Optional[List[str]]
+    genres: Optional[List[Optional[str]]]
     average_rating: Optional[float]
 
     @classmethod
@@ -27,8 +27,8 @@ class MovieItem(BaseModel):
 
 
 class MovieInfoResponse(BaseModel):
-    movie: MovieItem
-
+    movie: Optional[MovieItem]
+    success: bool
 
 class MovieRequest(BaseModel):
     movie_id: int
