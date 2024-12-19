@@ -19,6 +19,19 @@ class Movie(Base):
             title = movie_orm.title,
             imdb_id = movie_orm.imdb_id,
         )
+    
+class Genre(Base):
+    __tablename__ = 'genres'
+
+    genre_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+
+    @classmethod 
+    def from_orm(cls, genre_orm):
+        return cls(
+            genre_id = genre_orm.genre_id,
+            name = genre_orm.name,
+        )
 
 class MoviesWithInfo(Base):
     __tablename__ = 'movies_with_info'

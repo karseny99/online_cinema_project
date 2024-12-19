@@ -32,11 +32,18 @@ select {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ccc; /* Измените цвет рамки, если нужно */
+    border: 1px solid #fff; 
     border-radius: 4px;
-    background-color: #F7FFF7; /* Цвет фона полей */
+    background-color: #fff; /* Цвет фона полей */
     font-size: 16px;
 }
+
+select:focus {
+    border-color: #fff; /* Цвет рамки при фокусе */
+    outline: none; /* Убираем стандартный контур */
+    background-color: #fff; /* Цвет фона при фокусе (можно изменить) */
+}
+
 
 button {
     background-color: #bfbfbf; /* Измените цвет кнопки на желаемый */
@@ -49,6 +56,7 @@ button {
     width: 100%;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 
 button:hover {
     background-color: #c4c4c4; /* Цвет кнопки при наведении */
@@ -75,5 +83,3 @@ button:hover {
 .movie p {
     margin: 5px 0;
 }
-
-/* Остальные стили остаются без изменений */
