@@ -21,7 +21,6 @@ def get_distinct_genres() -> GenresResponse:
     '''
 
     search_function_name = "get_distinct_genres"
-    print("HERE")
     result = get_movie_rpc_client().send_task(search_function_name)
 
     if not result:

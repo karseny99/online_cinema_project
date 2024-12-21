@@ -2,7 +2,7 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
-    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -122,4 +122,34 @@ a:hover {
     background-color: #f9f9f9;
     margin-top: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.container {
+    display: flex;
+    flex-direction: column; /* Элементы будут располагаться в столбик */
+    align-items: center; /* Центрируем элементы по горизонтали */
+}
+
+.loading {
+    position: relative;
+    pointer-events: none; /* Отключаем взаимодействие с кнопкой во время загрузки */
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px; /* Размер индикатора загрузки */
+    height: 10px; /* Размер индикатора загрузки */
+    border: 3px solid #fff; /* Цвет границы */
+    border-top: 3px solid transparent; /* Цвет верхней части */
+    border-radius: 50%;
+    animation: spin 1s linear infinite; /* Анимация вращения */
+    transform: translate(-50%, -50%); /* Центрируем индикатор */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

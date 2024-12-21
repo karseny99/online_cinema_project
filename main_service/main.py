@@ -17,7 +17,6 @@ app = FastAPI()
 app.add_middleware(JWTMiddleware)
 
 templates = Jinja2Templates(directory="../frontend/templates")
-# <<<<<<< HEAD
 # app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
 app.mount("/static", StaticFiles(directory="../frontend/templates/static"), name="static")
 
@@ -25,9 +24,9 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(movie_router, prefix="/api", tags=["movies catalog"])
 app.include_router(user_router, prefix="/api", tags=["set movie rating"])
 
-# @app.exception_handler(RequestValidationError)
-# async def validation_exception_handler(request: Request, exc: RequestValidationError):
-#     return templates.TemplateResponse("page_not_found.html", {"request": request, "message": "Некорректный запрос. Пожалуйста, проверьте введенные данные."}, status_code=422)
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return templates.TemplateResponse("page_not_found.html", {"request": request, "message": "Некорректный запрос. Пожалуйста, проверьте введенные данные."}, status_code=422)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -51,9 +50,9 @@ async def register_page(request: Request):
 
 
 # Обработчик для всех других несуществующих маршрутов
-# @app.get("/{full_path:path}", response_class=HTMLResponse)
-# async def catch_all(request: Request, full_path: str):
-#     return templates.TemplateResponse("page_not_found.html", {"request": request, "message": "Страница не найдена."})
+@app.get("/{full_path:path}", response_class=HTMLResponse)
+async def catch_all(request: Request, full_path: str):
+    return templates.TemplateResponse("page_not_found.html", {"request": request, "message": "Страница не найдена."})
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)

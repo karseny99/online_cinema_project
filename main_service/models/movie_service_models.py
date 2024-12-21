@@ -33,5 +33,5 @@ class MovieRequest(BaseModel):
     movie_id: int
 
 class GenresResponse(BaseModel):
-    genres: List[str]
+    genres: Optional[List[Optional[str]]]
     success: bool

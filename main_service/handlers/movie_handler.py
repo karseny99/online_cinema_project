@@ -4,7 +4,6 @@ from typing import List, Optional
 import json 
 
 from models.movie_service_models import ElasticRequest, ElasticResponse, MovieItem, MovieInfoResponse, MovieRequest, GenresResponse
-# from rpc_client.rpc_client import send_task
 import service.movie_service
 import service.elastic_service
 
@@ -73,7 +72,7 @@ def get_genres():
     '''
         Ручка для получения списка уникальных жанров, которые есть в бд
     '''
-    genres = service.movie_service.get_distinct_genres()  # Вызов вашей функции для получения жанров
+    genres = service.movie_service.get_distinct_genres()
         
     if not genres.success:
         raise HTTPException(status_code=503, detail="Something went wrong. Please try again later.")

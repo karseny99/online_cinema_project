@@ -25,7 +25,7 @@ class JWTMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         token = request.cookies.get("jwt_token")
-        log.info(f"middleware: token got: {request.cookies.get("jwt_token")}")
+        log.info(f"middleware: token got: {request.cookies.get('jwt_token')}")
         if not token:
             return JSONResponse(
                 status_code=401,
