@@ -1,1 +1,1 @@
-celery -A main worker --loglevel=info 
+celery -A main worker --loglevel=info --prefetch-multiplier=1 --hostname=elastic_service@%h
