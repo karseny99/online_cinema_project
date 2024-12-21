@@ -4,7 +4,7 @@ from kombu import Queue
 import json
 
 from app.models.models import ElasticRequest, ElasticResponse
-from app.services.elastic_search import elastic_search, elastic_update_index
+from app.services.elastic_search import elastic_search, elastic_update_index, get_elastic_suggestions
 from app.services.redis import RedisClient
 from settings import (
     RMQ_PASSWORD,
@@ -70,3 +70,25 @@ def update_elastic_index() -> None:
         Updates elastic-index 
     '''
     elastic_update_index()
+
+
+@app.task(queue=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, name='get_suggestions')
+def get_suggestions(message_data) -> ElasticResponse:
+    '''
+        For given title returns suggestions
+    '''
+    try:
+        cache_key = f"suggest_movie:{json.dumps(message_data)}"
+        print(f"received query {cache_key}")
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        message = ElasticRequest(**message_data)
+        result = get_elastic_suggestions(message)
+
+        redis_client.set(cache_key, result.model_dump(), 600) # 10 minute cache's life
+        return result.model_dump()
+    except Exception as e:
+        print(f"Exception occured: {e}")
+        return ElasticResponse(movies=[], success=False).model_dump()

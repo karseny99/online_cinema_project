@@ -77,3 +77,27 @@ def get_genres():
     if not genres.success:
         raise HTTPException(status_code=503, detail="Something went wrong. Please try again later.")
     return genres
+
+
+@router.get("/suggestions", response_model=ElasticResponse)
+def get_suggestions(title: Optional[str] = None):
+    '''
+        Ручка для получения подсказок от эластика
+    '''
+
+    if not title:
+        return ElasticResponse(movies=[], success=False)
+
+
+    request = ElasticRequest(
+        title=title,
+        year=None,
+        genre=None,
+        director=None
+    )
+    suggestions = service.elastic_service.get_movie_suggestions(request)
+        
+    if not suggestions.success:
+        return ElasticResponse(movies=[], success=False)
+
+    return suggestions

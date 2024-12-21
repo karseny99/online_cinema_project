@@ -38,12 +38,15 @@ label {
 }
 
 input {
+    width: 100%;
     padding: 10px 15px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
     outline: none;
+    box-sizing: border-box;
+    display: block;
 }
 
 input:focus {
@@ -152,4 +155,30 @@ a:hover {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+
+#suggestions {
+    border: 1px solid #ccc;
+    display: none; /* Скрываем по умолчанию */
+    position: absolute; /* Позиционируем относительно родителя (обертки) */
+    background-color: white;
+    z-index: 1000; /* Убедитесь, что он выше других элементов */
+    width: calc(100% - 2px); /* Ширина равна ширине поля ввода */
+    max-height: 100px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем прокрутку, если слишком много подсказок */
+    margin-top: 2px; /* Отступ сверху, чтобы не перекрывать поле ввода */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Добавляем тень для подсказок */
+    border-radius: 5px; /* Закругляем углы */
+    margin-top: -22px;
+}
+
+
+#suggestions div {
+    cursor: pointer;
+    padding: 5px;
+}
+
+#suggestions div:hover {
+    background-color: #f0f0f0; /* Подсветка при наведении */
 }

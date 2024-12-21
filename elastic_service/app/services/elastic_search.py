@@ -57,29 +57,37 @@ def elastic_update_index() -> ElasticResponse:
     finally:
         es_client.close()
         
-# unused
-# def parse_search_request(contract: BaseContractModel) -> ElasticRequest:
-#     '''
-#         Gets raw message and parse it into ElasticRequest class
-#     '''
-#     if contract.contract_type != "search_request":
-#         raise ValueError("Invalid contract type")
-    
-#     try:
-#         elastic_request = ElasticRequest(**contract.body)
-#         return elastic_request
-#     except ValidationError as e:
-#         raise ValueError(f"Invalid body structure: {e}")
-    
-# def convert_to_base_contract(elastic_response: ElasticResponse) -> BaseContractModel:
-#     '''
-#         Internal class converts to base contract class
-#     '''
-#     return BaseContractModel(
-#         contract_type="search_response",
-#         body={"movies": elastic_response.movies},
-#     )
 
+def get_elastic_suggestions(query: ElasticRequest) -> ElasticResponse:
+    '''
+        Returns ElasticResponse of suggestions
+        filled only movie_title  
+    '''
+    es_client = ElasticSearch(host="localhost", port=9200, index_name="movies")
+    # es_client.delete_index()
+    # es_client.load_to_index()
+    # await es_client.check_index()
 
-# if __name__ == "__main__":
-#     asyncio.run(elastic_search(search_query))
+    try:
+        results = es_client.get_suggestions(query.title)
+    except Exception as e:
+        raise e
+    finally:
+        es_client.close()
+
+    results = ElasticResponse(movies=[
+        MovieItem(
+            movie_id=None,
+            movie_title=title,
+            year=None,
+            description=None,
+            info_title=None,
+            genres=None,
+            director=None,
+            average_rating=None,
+        ) for title in results
+        ],
+        success=True
+    )
+   
+    return results

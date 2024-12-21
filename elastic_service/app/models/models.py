@@ -11,7 +11,7 @@ class ElasticRequest(BaseModel):
 
 
 class MovieItem(BaseModel):
-    movie_id: int
+    movie_id: Optional[int]
     movie_title: Optional[str]
     year: Optional[int]
     director: Optional[str]

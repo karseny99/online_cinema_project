@@ -5,14 +5,14 @@ from typing import Optional, List, Any
 class ElasticRequest(BaseModel):
     title: Optional[str]
     year: Optional[int]
-    genre: Optional[List[str]]  # <- я хз почему я не сделал множественное число как в возврате, но мне лень пиздец менять
+    genre: Optional[List[Optional[str]]]  # <- я хз почему я не сделал множественное число как в возврате, но мне лень пиздец менять
     director: Optional[str]
     page: Optional[int] = 1
     page_size: Optional[int] = 10
 
 
 class MovieItem(BaseModel):
-    movie_id: int
+    movie_id: Optional[int]
     movie_title: Optional[str]
     year: Optional[int]
     director: Optional[str]

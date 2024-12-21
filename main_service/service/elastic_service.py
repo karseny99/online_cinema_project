@@ -8,9 +8,7 @@ def search_movies(request: ElasticRequest) -> ElasticResponse:
         Returns unsuccess ElasticResponse-class if timed out
     '''
     search_function_name = "search_movie"
-
     rpc_client = get_elastic_rpc_client()
-    
     result = rpc_client.send_task(search_function_name, request)
 
     if not result:
@@ -24,6 +22,22 @@ def update_elastic_index() -> None:
     '''
         Sends task to update elastic-index, no waiting for result
     '''
-    search_function_name = "update_index"
+    function_name = "update_index"
     rpc_client = get_elastic_rpc_client()
-    rpc_client.send_task_no_wait(search_function_name, None)
+    rpc_client.send_task_no_wait(function_name, None)
+
+
+def get_movie_suggestions(request: ElasticRequest) -> ElasticResponse:
+    '''
+        Sends task to get elastic suggestions
+    '''
+
+    function_name = "get_suggestions"
+    rpc_client = get_elastic_rpc_client()
+    result = rpc_client.send_task(function_name, request)
+
+    if not result:
+        return ElasticResponse(movies=[], success=False)
+    
+    result = ElasticResponse(**result)
+    return result

@@ -60,6 +60,9 @@ class ElasticSearch:
                                 "keyword": {"type": "keyword", "ignore_above": 256}
                             }
                         },
+                        "info_title_suggest": {
+                            "type": "completion"
+                        },
                         "genres": {
                             "type": "text",
                             "fields": {
@@ -71,6 +74,7 @@ class ElasticSearch:
                 }
             }
             self.es.indices.create(index=self.index_name, body=mapping)
+
             
 
     def load_to_index(self) -> None:
@@ -86,6 +90,7 @@ class ElasticSearch:
         for movie in movies:
             movie_dict = movie.__dict__
             movie_dict.pop('_sa_instance_state', None)
+            movie_dict['info_title_suggest'] = movie_dict['info_title']
             self.es.index(index=self.index_name, id=movie.movie_id, document=movie_dict)
         self.es.indices.refresh(index=self.index_name)
         print(f"Index '{self.index_name}' has been refreshed.")
@@ -125,45 +130,52 @@ class ElasticSearch:
 
         for movie in new_movies:
             movie_dict = movie.__dict__
-            movie_dict.pop('_sa_instance_state', None)  # Удалите внутреннее состояние SQLAlchemy, если нужно
+            movie_dict.pop('_sa_instance_state', None) 
+            movie_dict['info_title_suggest'] = movie_dict['info_title']
             self.es.index(index=self.index_name, id=movie.movie_id, document=movie_dict)
 
         self.es.indices.refresh(index=self.index_name)  # Обновите индекс
         print(f"Индекс '{self.index_name}' обновлен с новыми фильмами.")
 
 
-    # Untested
-    # async def update_index(self) -> None:
-    #     '''
-    #         Updates elastic index with new or modified movies
-    #     '''
-    #     movies = await get_movie_info()  
-    #     actions = []
-        
-    #     for movie in movies:
-    #         movie_dict = {
-    #             "_op_type": "index", 
-    #             "_index": self.index_name,
-    #             "_id": movie.movie_id,
-    #             "_source": {
-    #                 "movie_id": movie.movie_id,
-    #                 "movie_title": movie.movie_title,
-    #                 "year": movie.year,
-    #                 "director": movie.director,
-    #                 "description": movie.description,
-    #                 "info_title": movie.info_title,
-    #                 "genres": movie.genres,
-    #                 "average_rating": movie.average_rating
-    #             }
-    #         }
-    #         actions.append(movie_dict)
+    def get_suggestions(self, title: str, limit: int = 10) -> list:
+        '''
+            Elastic's suggestions using Suggester.
 
-    #     # Выполните пакетное обновление
-    #     if actions:
-    #         helpers.bulk(self.es, actions)
+            title: str - part of input
+            limit: int - max count of suggestions
 
-    #     # Обновите индекс, если это необходимо
-    #     self.es.indices.refresh(index=self.index_name)
+            Returns list of suggestions
+        '''
+
+        if not title:
+            return []
+
+        es_query = {
+            "suggest": {
+                "movie-suggest": {
+                    "prefix": title,
+                    "completion": {
+                        "field": "info_title_suggest",
+                        "fuzzy": {
+                            "fuzziness": "AUTO"
+                        },
+                        "size": limit
+                    }
+                }
+            }
+        }
+
+        try:
+            response = self.es.search(index=self.index_name, body=es_query)
+        except Exception as e:
+            print("Error during Elasticsearch search for suggestions:", e)
+            raise e
+
+        suggestions = response.get("suggest", {}).get("movie-suggest", [])
+        result = [option["text"] for suggestion in suggestions for option in suggestion["options"]]
+        return result
+
 
 
     def search(self, query: dict) -> list:
