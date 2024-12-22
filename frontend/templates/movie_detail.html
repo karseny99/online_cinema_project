@@ -3,45 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Details</title>
+    <title>Movie details</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        #movieDetails {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .movie-poster {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .star {
+            font-size: 30px;
+            color: #ddd;
+        }
+
+        .star.selected {
+            color: #ffc107;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        h3 {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <div id="movieDetails"></div>
 
     <script>
-        // Получаем movie_id из переменной, переданной в шаблон
         const movieId = {{ movie_id }};
 
         async function fetchMovieDetails() {
             try {
                 const response = await fetch(`/api/movies/${movieId}`);
                 if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Фильм не найден.');
-                    } else {
-                        throw new Error('Ошибка при загрузке данных о фильме');
-                    }
+                    throw new Error('Ошибка при загрузке данных о фильме');
                 }
                 const movie = await response.json();
 
-                // Отображение информации о фильме
                 const movieDetailsDiv = document.getElementById('movieDetails');
                 movieDetailsDiv.innerHTML = `
+                    <img class="movie-poster" src="${movie.movie_poster_url}" alt="Movie poster">
                     <h1>${movie.movie_title} (${movie.year})</h1>
-                    <h2>Режиссер: ${movie.director}</h2>
-                    <h3>Жанры: ${movie.genres.join(', ')}</h3>
-                    <h3>Средний рейтинг: ${movie.average_rating}</h3>
-                    <h3>Описание: ${movie.description || 'Нет описания'}</h3>
+                    <h2>Director: ${movie.director}</h2>
+                    <h3>Genres: ${movie.genres.join(', ')}</h3>
+                    <h3>Rating: ${movie.average_rating}</h3>
+                    <h3>Description: ${movie.description || 'No description'}</h3>
+                    <video controls>
+                        <source src="${movie.movie_url}" type="video/mp4">
+                        Your browser does not support video playback
+                    </video>
+                    <div class="rating">
+                        <h3>Rate movie:</h3>
+                        <div class="rating-stars">
+                            ${[1, 2, 3, 4, 5].map(star => `<span class="star" data-value="${star}">&#9733;</span>`).join('')}
+                        </div>
+                    </div>
                 `;
+
+                setupRating(movieId);
             } catch (error) {
                 console.error(error);
                 document.getElementById('movieDetails').innerHTML = `<p style="color: red;">${error.message}</p>`;
             }
         }
 
+        function setupRating(movieId) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', async () => {
+                    const rating = parseFloat(star.dataset.value);
+                    try {
+                        const response = await fetch('/api/set-rating', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                movie_id: movieId,
+                                user_id: -1,
+                                rating: rating
+                            }),
+                        });
 
-        // Вызов функции для загрузки данных о фильме
+                        if (response.ok) {
+                            stars.forEach(s => s.classList.remove('selected'));
+                            for (let i = 0; i < rating; i++) {
+                                stars[i].classList.add('selected');
+                            }
+                        } else {
+                            alert('Ошибка при установке рейтинга. Попробуйте позже.');
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        alert('Ошибка при установке рейтинга. Попробуйте позже.');
+                    }
+                });
+            });
+        }
+
         fetchMovieDetails();
     </script>
 </body>

@@ -11,6 +11,8 @@ class MovieItem(BaseModel):
     info_title: Optional[str]
     genres: Optional[List[Optional[str]]]
     average_rating: Optional[float]
+    movie_url: Optional[str]
+    movie_poster_url: Optional[str]
 
     @classmethod
     def from_orm(cls, movie_orm: MoviesWithInfo) -> "MovieItem":
@@ -23,6 +25,8 @@ class MovieItem(BaseModel):
             info_title=movie_orm.info_title,
             genres=movie_orm.genres,
             average_rating=movie_orm.average_rating,
+            movie_url="",
+            movie_poster_url="",
         )
 
 
