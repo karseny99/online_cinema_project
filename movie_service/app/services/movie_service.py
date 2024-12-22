@@ -27,11 +27,14 @@ class MovieService:
         movie = MovieItem.from_orm(movie)
         movie = MovieInfoResponse(movie=movie, success=True)
 
-        movie_s3 = S3Repository()
-        movie_urls_dict = movie_s3.get_url(movie.movie.movie_title)
+        try:
+            movie_s3 = S3Repository()
+            movie_urls_dict = movie_s3.get_url(movie.movie.movie_title)
+            movie.movie.movie_url = movie_urls_dict["movie_url"]
+            movie.movie.movie_poster_url = movie_urls_dict["movie_poster_url"]
+        except Exception as e:
+            log.info(f"connection to s3 error: {e}")
 
-        movie.movie.movie_url = movie_urls_dict["movie_url"]
-        movie.movie.movie_poster_url = movie_urls_dict["movie_poster_url"]
         log.info(f"movie_url: {movie.movie.movie_url}\nmovie_poster_url:{movie.movie.movie_poster_url}")
         return movie
 
