@@ -20,5 +20,5 @@ class MovieRating(Base):
             user_id = movie_rating_orm.user_id,
             movie_id = movie_rating_orm.movie_id,
             rating = movie_rating_orm.rating,
-            rated_ad = movie_rating_orm.rated_at
+            rated_at=movie_rating_orm.rated_at
         )

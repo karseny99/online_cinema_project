@@ -74,17 +74,32 @@
                 const movie = await response.json();
 
                 const movieDetailsDiv = document.getElementById('movieDetails');
-                movieDetailsDiv.innerHTML = `
-                    <img class="movie-poster" src="${movie.movie_poster_url}" alt="Movie poster">
+                
+                // Формируем HTML-код с условными проверками
+                let movieContent = `
                     <h1>${movie.movie_title} (${movie.year})</h1>
                     <h2>Director: ${movie.director}</h2>
                     <h3>Genres: ${movie.genres.join(', ')}</h3>
-                    <h3>Rating: ${movie.average_rating}</h3>
+                    <h3>Rating: ${(movie.average_rating).toFixed(1)}</h3>
                     <h3>Description: ${movie.description || 'No description'}</h3>
-                    <video controls>
-                        <source src="${movie.movie_url}" type="video/mp4">
-                        Your browser does not support video playback
-                    </video>
+                `;
+
+                // Проверяем, есть ли обложка
+                if (movie.movie_poster_url) {
+                    movieContent += `<img class="movie-poster" src="${movie.movie_poster_url}" alt="Movie poster">`;
+                }
+
+                // Проверяем, есть ли видео
+                if (movie.movie_url) {
+                    movieContent += `
+                        <video controls>
+                            <source src="${movie.movie_url}" type="video/mp4">
+                            Your browser does not support video playback
+                        </video>
+                    `;
+                }
+
+                movieContent += `
                     <div class="rating">
                         <h3>Rate movie:</h3>
                         <div class="rating-stars">
@@ -92,6 +107,26 @@
                         </div>
                     </div>
                 `;
+
+                movieDetailsDiv.innerHTML = movieContent;
+
+                // Получаем рейтинг для текущего пользователя
+                const ratingResponse = await fetch(`/api/get-rating?movie_id=${movieId}`);
+                if (ratingResponse.ok) {
+                    const ratingData = await ratingResponse.json();
+                    const userRating = ratingData.rating; // Предполагается, что ratingData содержит поле rating
+
+                    // Подсвечиваем звезды в зависимости от рейтинга
+                    const stars = document.querySelectorAll('.star'); // Получаем все звезды
+                    if (userRating !== null && userRating >= 0 && userRating <= 5) { // Проверяем, что рейтинг в допустимых пределах
+                        for (let i = 0; i < userRating; i++) {
+                            if (stars[i]) { // Проверяем, что звезда существует
+                                stars[i].classList.add('selected'); // Подсвечиваем звезды
+                            }
+                        }
+                    }
+                        
+                }
 
                 setupRating(movieId);
             } catch (error) {
@@ -113,7 +148,7 @@
                             },
                             body: JSON.stringify({
                                 movie_id: movieId,
-                                user_id: -1,
+                                user_id: -1, // Замените на реальный user_id, если он доступен
                                 rating: rating
                             }),
                         });
@@ -121,7 +156,9 @@
                         if (response.ok) {
                             stars.forEach(s => s.classList.remove('selected'));
                             for (let i = 0; i < rating; i++) {
-                                stars[i].classList.add('selected');
+                                if (stars[i]) { // Проверяем, что звезда существует
+                                    stars[i].classList.add('selected');
+                                }
                             }
                         } else {
                             alert('Ошибка при установке рейтинга. Попробуйте позже.');

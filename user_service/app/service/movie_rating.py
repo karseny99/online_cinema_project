@@ -1,7 +1,7 @@
 from pyexpat.errors import messages
 
 from app.repositories.movie_rating import MovieRatingRepository
-from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse
+from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse
 import logging
 
 log = logging.getLogger(__name__)
@@ -39,4 +39,25 @@ class MovieRatingService:
                 movie_id=req.movie_id,
                 success=False,
                 message=e
+            )
+        
+    def get_rating(self, req: GetMovieRatingRequest) -> GetMovieRatingResponse:
+
+            '''
+                Returns for given movie_id and user_id rating
+            '''
+
+            result = self.movie_rating_repository.get_rating_info(movie_id=req.movie_id, user_id=req.user_id)
+            if not result:
+                return GetMovieRatingResponse(
+                    movie_id=None, 
+                    user_id=None, 
+                    rating=None, 
+                    success=True,
+                )
+            return GetMovieRatingResponse(
+                movie_id=result.movie_id, 
+                user_id=result.user_id, 
+                rating=result.rating, 
+                success=True,
             )

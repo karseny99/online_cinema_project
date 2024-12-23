@@ -3,8 +3,8 @@ import logging
 from fastapi import APIRouter, Response, Depends
 from handlers.middleware import get_current_user
 
-from models.user_service_models import SetMovieRatingResponse, SetMovieRatingRequest
-from service.user_service import set_rating
+from models.user_service_models import SetMovieRatingResponse, SetMovieRatingRequest, GetMovieRatingRequest, GetMovieRatingResponse
+from service.user_service import set_rating, get_rating
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -35,3 +35,15 @@ def set_movie_rating(
     else:
         response.status_code = http.HTTPStatus.BAD_REQUEST
     return resp
+
+
+@router.get("/get-rating", response_model=GetMovieRatingResponse)
+def set_movie_rating(
+        movie_id: int,
+        current_user: dict = Depends(get_current_user)
+):
+    req = GetMovieRatingRequest(user_id=current_user["sub"], movie_id=movie_id)
+    resp = get_rating(req)
+
+    return resp
+    

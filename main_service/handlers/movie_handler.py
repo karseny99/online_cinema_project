@@ -88,16 +88,17 @@ def get_suggestions(title: Optional[str] = None):
     if not title:
         return ElasticResponse(movies=[], success=False)
 
-
-    request = ElasticRequest(
-        title=title,
-        year=None,
-        genre=None,
-        director=None
-    )
-    suggestions = service.elastic_service.get_movie_suggestions(request)
-        
-    if not suggestions.success:
-        return ElasticResponse(movies=[], success=False)
-
-    return suggestions
+    try:
+        request = ElasticRequest(
+            title=title,
+            year=None,
+            genre=None,
+            director=None
+        )
+        suggestions = service.elastic_service.get_movie_suggestions(request)
+            
+        if not suggestions.success:
+            return ElasticResponse(movies=[], success=False)
+        return suggestions
+    except Exception as e:
+        raise HTTPException(status_code=503, detail="Something went wrong. Please try again later.")

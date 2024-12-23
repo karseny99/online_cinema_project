@@ -21,8 +21,8 @@ class MovieItem(BaseModel):
     info_title: Optional[str]
     genres: Optional[List[Optional[str]]]
     average_rating: Optional[float]
-    movie_url: Optional[str]
-    movie_poster_url: Optional[str]
+    movie_url: Optional[str] = None
+    movie_poster_url: Optional[str] = None
 
 class ElasticResponse(BaseModel):
     movies: List[MovieItem]

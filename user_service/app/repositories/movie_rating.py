@@ -14,15 +14,23 @@ class MovieRatingRepository:
             Function adds new movie_rating to a database
             Returns a distinct rating_id
         '''
-
-        new_rating = MovieRating(
-            movie_id=movie_id,
-            user_id=user_id,
-            rating=rating,
-            rated_at=datetime.now()
-        )
-
         with get_session() as session:
+
+            existing_rating = session.query(MovieRating).filter_by(movie_id=movie_id, user_id=user_id).first()
+
+            if existing_rating:
+                # Если рейтинг существует, удаляем его
+                session.delete(existing_rating)
+                print(f"Existing rating with id {existing_rating.rating_id} has been deleted.")
+
+
+            new_rating = MovieRating(
+                movie_id=movie_id,
+                user_id=user_id,
+                rating=rating,
+                rated_at=datetime.now()
+            )
+
             session.add(new_rating)
             session.flush()  # Принудительно сохраняем объект, чтобы получить rating_id
 
@@ -34,9 +42,13 @@ class MovieRatingRepository:
             Returns info about movie_rating with given movie_id, user_id
         '''
         with get_session() as session:
-            user = None
+            rating = None
             try:
-                user = MovieRating.from_orm(session.query(MovieRating).filter_by(movie_id == movie_id and user_id == user_id).one())
-                return user
+                rating = MovieRating.from_orm(session.query(MovieRating).filter(
+                    MovieRating.movie_id == movie_id,
+                    MovieRating.user_id == user_id
+                ).one())
+                rating = MovieRating.from_orm(rating)
             except NoResultFound:
                 print(f"Movie with movie_id {movie_id} not found in ratings")
+            return rating

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Optional
 
 class SetMovieRatingRequest(BaseModel):
     movie_id: int
@@ -12,3 +12,14 @@ class SetMovieRatingResponse(BaseModel):
     user_id: int
     success: bool
     message: str
+
+class GetMovieRatingRequest(BaseModel):
+    movie_id: Optional[int] = None
+    user_id: Optional[int] = None
+
+
+class GetMovieRatingResponse(BaseModel):
+    movie_id: Optional[int] = None
+    user_id: Optional[int] = None
+    rating: Optional[int] = None
+    success: bool
