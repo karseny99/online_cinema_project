@@ -1,13 +1,15 @@
 import logging
 
 from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from core.config import settings
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.responses import RedirectResponse
 
 log = logging.getLogger(__name__)
+
 
 class JWTMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: FastAPI):
@@ -48,3 +50,13 @@ def get_current_user(request: Request):
     if not hasattr(request.state, "user") or request.state.user is None:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return request.state.user
+
+
+class RedirectOnExpiredTokenMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+
+        if response.status_code == 401 and response.headers.get("content-type") == "application/json":
+            return RedirectResponse(url="/auth/login")
+
+        return response

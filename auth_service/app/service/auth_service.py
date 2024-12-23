@@ -2,7 +2,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from app.repositories.user_repo import UserRepository
 from datetime import datetime, timedelta
-from app.core.config import settings
+from app.core.config import settings, Settings
 
 
 class RegistrationException(Exception):
@@ -46,11 +46,9 @@ class AuthService:
             email=email,
             password_hash=hashed_password,
             role=role)
-        print(f"user_id: {user_id}")
         return user_id
 
     def authenticate_user(self, username: str, password: str):
-        print(f"service:: username: {username}, password: {password}")
         user = self.user_repository.get_user_login_info(username)
 
         if not user:
@@ -61,7 +59,8 @@ class AuthService:
 
     def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
-        expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+        stgs = Settings()
+        expire = datetime.utcnow() + (expires_delta or timedelta(minutes=stgs.JWT_EXPIRATION_MINUTES))
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
         return encoded_jwt

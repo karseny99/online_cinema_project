@@ -74,7 +74,7 @@
                 const movie = await response.json();
 
                 const movieDetailsDiv = document.getElementById('movieDetails');
-                
+
                 // Формируем HTML-код с условными проверками
                 let movieContent = `
                     <h1>${movie.movie_title} (${movie.year})</h1>
@@ -125,7 +125,7 @@
                             }
                         }
                     }
-                        
+
                 }
 
                 setupRating(movieId);
