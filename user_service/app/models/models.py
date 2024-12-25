@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Any, Optional
-
+from datetime import datetime
 
 class SetMovieRatingRequest(BaseModel):
     movie_id: int
@@ -26,10 +26,13 @@ class GetMovieRatingResponse(BaseModel):
     rating: Optional[int] = None
     success: bool
 
-class UserRoleRequest(BaseModel):
+class UserInfoRequest(BaseModel):
     user_id: int
 
-class UserRoleResponse(BaseModel):
+class UserInfoResponse(BaseModel):
     user_id: Optional[int]
+    username: Optional[str]
+    email: Optional[str]
     role: Optional[str]
+    registered_at: Optional[datetime]
     success: bool

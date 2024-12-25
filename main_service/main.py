@@ -11,7 +11,7 @@ from handlers.movie_handler import router as movie_router
 from handlers.auth import router as auth_router
 from handlers.user_handler import router as user_router
 from handlers.ping import router as ping_router
-from handlers.user_handler import get_user_role
+from handlers.user_handler import get_user_info
 import uvicorn
 
 app = FastAPI()
@@ -52,13 +52,14 @@ async def register_page(request: Request):
     return templates.TemplateResponse("login.html", {"request":  request})
 
 def is_admin(current_user: dict = Depends(get_current_user)):
-    user_role_response = get_user_role(current_user)
+    user_role_response = get_user_info(current_user)
+    print(user_role_response.role)
     if user_role_response.role != "admin":
         raise HTTPException(status_code=403, detail="Access Denied")
 
-@app.get("/monitoring", response_class=HTMLResponse)
+@app.get("/admin_panel", response_class=HTMLResponse)
 async def monitoring(request: Request, user: dict = Depends(is_admin)):
-    return templates.TemplateResponse("monitoring.html", {"request": request})
+    return templates.TemplateResponse("admin_panel.html", {"request": request})
 
 
 # Обработчик для всех других несуществующих маршрутов

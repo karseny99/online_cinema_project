@@ -5,9 +5,9 @@ from kombu import Queue
 import json
 import logging
 
-from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse, UserRoleResponse, UserRoleRequest
+from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse, UserInfoRequest, UserInfoResponse
 from app.service.movie_rating import MovieRatingService
-from app.service.user import get_user_role
+from app.service.user import get_user_info
 from app.service.redis import RedisClient
 from settings import (
     RMQ_PASSWORD,
@@ -99,21 +99,20 @@ def get_movie_rating(message_data):
         return GetMovieRatingResponse(movie_id=None, user_id=None, rating=None, success=False).model_dump()
 
 
-@app.task(queue=MQ_ROUTING_KEY_RPC_USER_QUEUE, name="get_user_role")
-def get_role(message_data):
+@app.task(queue=MQ_ROUTING_KEY_RPC_USER_QUEUE, name="get_user_info")
+def get_info(message_data):
     '''
-        Returns user's role
+        Returns user's info w/ password
     '''
     try:
-        cache_key = f"get_user_role:{json.dumps(message_data)}"
+        cache_key = f"get_user_info:{json.dumps(message_data)}"
         cached_result = redis_client.get(cache_key)
         if cached_result:
             return cached_result
 
-        request = UserRoleRequest(**message_data) 
-        print(f"Given: {request}")
+        request = UserInfoRequest(**message_data) 
 
-        result = get_user_role(request)
+        result = get_user_info(request)
         redis_client.set(cache_key, result.model_dump(), 24 * 3600)
         return result.model_dump()
     except Exception as e:

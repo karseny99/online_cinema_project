@@ -3,9 +3,9 @@ import logging
 from fastapi import APIRouter, Response, Depends
 from handlers.middleware import get_current_user
 
-from models.user_service_models import SetMovieRatingResponse, SetMovieRatingRequest, GetMovieRatingRequest, GetMovieRatingResponse, UserRoleRequest, UserRoleResponse
-from service.user_service import set_rating, get_rating, get_role
-
+from models.user_service_models import SetMovieRatingResponse, SetMovieRatingRequest, GetMovieRatingRequest, GetMovieRatingResponse, UserInfoRequest, UserInfoResponse
+from service.user_service import set_rating, get_rating
+import service.user_service
 router = APIRouter()
 log = logging.getLogger(__name__)
 
@@ -48,8 +48,8 @@ def get_movie_rating(
     return resp
     
 
-@router.get("/get-role", response_model=UserRoleResponse)
-def get_user_role(current_user: dict = Depends(get_current_user)):
-    req = UserRoleRequest(user_id=current_user["sub"])
-    resp = get_role(req)
+@router.get("/get_user_info", response_model=UserInfoResponse)
+def get_user_info(current_user: dict = Depends(get_current_user)):
+    req = UserInfoRequest(user_id=current_user["sub"])
+    resp = service.user_service.get_user_info(req)
     return resp
