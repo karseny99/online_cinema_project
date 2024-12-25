@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3aa8;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 1.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+            margin-bottom: 2rem;
+        }
+
+        .user-info h2 {
+            margin: 0 0 1rem;
+            font-size: 1.5rem;
+            color: #4CAF50;
+        }
+
+        .user-info p {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .ratings {
+            margin-top: 2rem;
+        }
+
+        .ratings h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .movie-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .movie-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .movie-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .movie-item a {
+            text-decoration: none;
+            color: #333;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .movie-item a:hover {
+            color: #4CAF50;
+        }
+
+        .movie-item span {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        User Profile
+    </header>
+    <div class="container">
+        <!-- User Info -->
+        <div class="user-info">
+            <h2>Profile Details</h2>
+            <p><strong>Username:</strong> <span id="username">Loading...</span></p>
+            <p><strong>Email:</strong> <span id="email">Loading...</span></p>
+            <p><strong>Role:</strong> <span id="role">Loading...</span></p>
+            <p><strong>Registered At:</strong> <span id="registered_at">Loading...</span></p>
+        </div>
+
+        <!-- Ratings -->
+        <div class="ratings">
+            <h3>Movie Ratings</h3>
+            <ul class="movie-list" id="movie-list">
+                <li>Loading...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/api/get_user_info', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user information');
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('username').textContent = data.username;
+                    document.getElementById('email').textContent = data.email;
+                    document.getElementById('role').textContent = data.role;
+                    document.getElementById('registered_at').textContent = new Date(data.registered_at).toLocaleString();
+
+                    const movieList = document.getElementById('movie-list');
+                    movieList.innerHTML = '';
+
+                    if (data.ratings && data.ratings.length > 0) {
+                        data.ratings.forEach(movie => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'movie-item';
+
+                            const link = document.createElement('a');
+                            link.href = `/movies/${movie.movie_id}`;
+                            link.textContent = movie.movie_title || 'Untitled Movie';
+
+                            const rating = document.createElement('span');
+                            rating.textContent = `Rating: ${movie.rating || 'N/A'}/10`;
+
+                            listItem.appendChild(link);
+                            listItem.appendChild(rating);
+                            movieList.appendChild(listItem);
+                        });
+                    } else {
+                        movieList.innerHTML = '<li>No movies rated yet.</li>';
+                    }
+                } else {
+                    alert('Failed to fetch user data.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while fetching user data.');
+            }
+        }
+
+        // Fetch user info on page load
+        document.addEventListener('DOMContentLoaded', fetchUserInfo);
+    </script>
+</body>
+</html>

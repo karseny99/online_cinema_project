@@ -51,6 +51,11 @@ async def register_page(request: Request):
 async def register_page(request: Request):
     return templates.TemplateResponse("login.html", {"request":  request})
 
+@app.get("/profile", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("user_profile.html", {"request":  request})
+
+
 def is_admin(current_user: dict = Depends(get_current_user)):
     user_role_response = get_user_info(current_user)
     print(user_role_response.role)

@@ -2,7 +2,10 @@ import logging
 import json
 
 from rpc_client.rpc_client import get_user_rpc_client
-from models.user_service_models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse, UserInfoRequest, UserInfoResponse
+from models.user_service_models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, \
+    GetMovieRatingResponse, UserInfoRequest, UserInfoResponse, Movie
+from models.movie_service_models import MovieRequest, MovieInfoResponse
+from rpc_client.rpc_client import get_movie_rpc_client
 
 log = logging.getLogger(__name__)
 
@@ -37,8 +40,8 @@ def get_rating(req: GetMovieRatingRequest) -> GetMovieRatingResponse:
 
 def get_user_info(req: UserInfoRequest) -> UserInfoResponse:
 
-    get_rating_function_name = "get_user_info"
-    result = get_user_rpc_client().send_task(get_rating_function_name, req)
+    get_user_info_function_name = "get_user_info"
+    result = get_user_rpc_client().send_task(get_user_info_function_name, req)
 
     if not result:
         return UserInfoResponse(
@@ -47,8 +50,25 @@ def get_user_info(req: UserInfoRequest) -> UserInfoResponse:
             email=None,
             role=None,
             registered_at=None,
+            ratings=None,
             success=False,
         )
-    
+
     result = UserInfoResponse(**result)
+    get_movie_info_function_name = "get_movie_info"
+    movie_request = MovieRequest(movie_id=-1)
+    for i in range(len(result.ratings)):
+        movie_item = result.ratings[i]
+        movie_request.movie_id = movie_item.movie_id
+        get_movie_result = get_movie_rpc_client().send_task(get_movie_info_function_name, movie_request)
+        if not result:
+            logging.error(f"Get movie info failed")
+        else:
+            resp = MovieInfoResponse(**get_movie_result)
+            result.ratings[i].movie_title = resp.movie.movie_title
+
+
+    if not result.ratings:
+        logging.error(f"Ratings were not delivered")
+
     return result

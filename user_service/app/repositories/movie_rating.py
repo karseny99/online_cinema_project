@@ -1,9 +1,12 @@
+import logging
+
 from app.repositories.connector import *
 
 from datetime import datetime
 from sqlalchemy.orm.exc import NoResultFound
 
 from app.repositories.models.movie_rating import MovieRating
+from typing import List
 
 class MovieRatingRepository:
     def __init__(self):
@@ -50,5 +53,21 @@ class MovieRatingRepository:
                 ).one())
                 rating = MovieRating.from_orm(rating)
             except NoResultFound:
-                print(f"Movie with movie_id {movie_id} not found in ratings")
+                logging.info(f"Movie with movie_id {movie_id} not found in ratings")
             return rating
+
+    def get_ratings_info(self, user_id: int) -> List[MovieRating]:
+        '''
+            Returns list of movies ratings for a given user_id
+        '''
+        with get_session() as session:
+            ratings = []
+            try:
+                ratings_query = session.query(MovieRating).filter(
+                    MovieRating.user_id == user_id
+                ).all()
+
+                ratings = [MovieRating.from_orm(rating) for rating in ratings_query]
+            except NoResultFound:
+                logging.info(f"No movie ratings found for user_id {user_id}")
+            return ratings

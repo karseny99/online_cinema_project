@@ -16,9 +16,9 @@ class MovieRating(Base):
     @classmethod
     def from_orm(cls, movie_rating_orm):
         return cls(
-            rating_id = movie_rating_orm.rating_id,
-            user_id = movie_rating_orm.user_id,
-            movie_id = movie_rating_orm.movie_id,
-            rating = movie_rating_orm.rating,
+            rating_id=movie_rating_orm.rating_id,
+            user_id=movie_rating_orm.user_id,
+            movie_id=movie_rating_orm.movie_id,
+            rating=movie_rating_orm.rating,
             rated_at=movie_rating_orm.rated_at
         )

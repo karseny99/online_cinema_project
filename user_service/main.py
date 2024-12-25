@@ -5,9 +5,11 @@ from kombu import Queue
 import json
 import logging
 
+from sqlalchemy.testing.suite.test_reflection import users
+
 from app.models.models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse, UserInfoRequest, UserInfoResponse
 from app.service.movie_rating import MovieRatingService
-from app.service.user import get_user_info
+from app.service.user import UserService
 from app.service.redis import RedisClient
 from settings import (
     RMQ_PASSWORD,
@@ -112,8 +114,8 @@ def get_info(message_data) -> UserInfoResponse:
             return cached_result
 
         request = UserInfoRequest(**message_data) 
-
-        result = get_user_info(request)
+        user_service = UserService()
+        result = user_service.get_user_info(request)
         redis_client.set(cache_key, result.model_dump(), 24 * 3600)
         return result.model_dump()
     except Exception as e:
