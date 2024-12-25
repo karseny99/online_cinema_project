@@ -50,7 +50,7 @@ class RedisClient:
         '''
 
         try:
-            self.redis_client.set(cache_key, json.dumps(cache_data), ex=expires)
+            self.redis_client.set(cache_key, json.dumps(cache_data, sort_keys=True, default=str), ex=expires)
 
             print(f"Successfully saved result in cache by {cache_key}")
             return True

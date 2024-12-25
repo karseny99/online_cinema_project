@@ -17,6 +17,8 @@ from settings import (
     MQ_MESSAGE_TTL,
 )
 
+MINIO_TIMEOUT = 1
+
 app = Celery(
     'tasks', 
     broker=f'pyamqp://{RMQ_USER}:{RMQ_PASSWORD}@{MQ_HOST}:{MQ_PORT}//', 
@@ -62,7 +64,8 @@ def ping(message_data) -> PingResponse:
                 MINIO_CONFIG['endpoint'],
                 access_key=MINIO_CONFIG['access_key'],
                 secret_key=MINIO_CONFIG['secret_key'],
-                secure=False  # Установите True, если используете HTTPS
+                secure=False,  # Установите True, если используете HTTPS
+                http_client=Minio.create_http_client(timeout=MINIO_TIMEOUT),
             )
             # Попробуем получить список бакетов для проверки доступности
             buckets = minio_client.list_buckets()
@@ -88,7 +91,7 @@ def ping(message_data) -> PingResponse:
         ).model_dump()
     except Exception as e:
         return PingResponse(
-            service_type=None,
+            service_type=request.service_type,
             pong=None,
             success=False,
         ).model_dump()

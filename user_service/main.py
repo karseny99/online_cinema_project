@@ -66,6 +66,7 @@ def set_movie_rating(message_data):
     cached_result = redis_client.get(cache_key)
     if cached_result:
         cache_update = GetMovieRatingResponse(movie_id=res.movie_id, user_id=res.user_id, rating=int(message.rating), success=True)
+
         redis_client.set(cache_key, cache_update.model_dump(), 24 * 3600)  # Обновляем кэш с новым рейтингом
 
     return SetMovieRatingResponse(
@@ -100,12 +101,12 @@ def get_movie_rating(message_data):
 
 
 @app.task(queue=MQ_ROUTING_KEY_RPC_USER_QUEUE, name="get_user_info")
-def get_info(message_data):
+def get_info(message_data) -> UserInfoResponse:
     '''
         Returns user's info w/ password
     '''
     try:
-        cache_key = f"get_user_info:{json.dumps(message_data)}"
+        cache_key = f"get_user_info:{json.dumps(message_data, sort_keys=True)}"
         cached_result = redis_client.get(cache_key)
         if cached_result:
             return cached_result
@@ -117,4 +118,4 @@ def get_info(message_data):
         return result.model_dump()
     except Exception as e:
         log.error(f"Error occured: {str(e)}")
-        return GetMovieRatingResponse(movie_id=None, user_id=None, rating=None, success=False).model_dump()
+        return UserInfoResponse(movie_id=None, user_id=None, rating=None, success=False).model_dump()
