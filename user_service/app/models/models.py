@@ -25,3 +25,11 @@ class GetMovieRatingResponse(BaseModel):
     user_id: Optional[int] = None
     rating: Optional[int] = None
     success: bool
+
+class UserRoleRequest(BaseModel):
+    user_id: int
+
+class UserRoleResponse(BaseModel):
+    user_id: Optional[int]
+    role: Optional[str]
+    success: bool

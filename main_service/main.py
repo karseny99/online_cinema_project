@@ -1,15 +1,17 @@
 from wsgiref.util import request_uri
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
 
-from handlers.middleware import JWTMiddleware, RedirectOnExpiredTokenMiddleware
+from handlers.middleware import JWTMiddleware, RedirectOnExpiredTokenMiddleware, get_current_user
 from handlers.movie_handler import router as movie_router
 from handlers.auth import router as auth_router
 from handlers.user_handler import router as user_router
+from handlers.ping import router as ping_router
+from handlers.user_handler import get_user_role
 import uvicorn
 
 app = FastAPI()
@@ -23,6 +25,7 @@ app.mount("/static", StaticFiles(directory="../frontend/templates/static"), name
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(movie_router, prefix="/api", tags=["movies catalog"])
 app.include_router(user_router, prefix="/api", tags=["set movie rating"])
+app.include_router(ping_router, prefix="/api", tags=["ping"])
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -47,6 +50,15 @@ async def register_page(request: Request):
 @app.get("/auth/login", response_class=HTMLResponse)
 async def register_page(request: Request):
     return templates.TemplateResponse("login.html", {"request":  request})
+
+def is_admin(current_user: dict = Depends(get_current_user)):
+    user_role_response = get_user_role(current_user)
+    if user_role_response.role != "admin":
+        raise HTTPException(status_code=403, detail="Access Denied")
+
+@app.get("/monitoring", response_class=HTMLResponse)
+async def monitoring(request: Request, user: dict = Depends(is_admin)):
+    return templates.TemplateResponse("monitoring.html", {"request": request})
 
 
 # Обработчик для всех других несуществующих маршрутов
