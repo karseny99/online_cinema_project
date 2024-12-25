@@ -2,7 +2,7 @@ import logging
 import json
 
 from rpc_client.rpc_client import get_user_rpc_client
-from models.user_service_models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse
+from models.user_service_models import SetMovieRatingRequest, SetMovieRatingResponse, GetMovieRatingRequest, GetMovieRatingResponse, UserRoleRequest, UserRoleResponse
 
 log = logging.getLogger(__name__)
 
@@ -32,4 +32,20 @@ def get_rating(req: GetMovieRatingRequest) -> GetMovieRatingResponse:
         )
     
     result = GetMovieRatingResponse(**result)
+    return result
+
+
+def get_role(req: UserRoleRequest) -> UserRoleResponse:
+
+    get_rating_function_name = "get_user_role"
+    result = get_user_rpc_client().send_task(get_rating_function_name, req)
+
+    if not result:
+        return UserRoleResponse(
+            user_id=None, 
+            role=None,
+            success=False,
+        )
+    
+    result = UserRoleResponse(**result)
     return result

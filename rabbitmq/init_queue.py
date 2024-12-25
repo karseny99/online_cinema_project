@@ -10,6 +10,7 @@ from settings import (
     MQ_ROUTING_KEY_RPC_USER_QUEUE,
     MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE,
     MQ_ROUTING_KEY_RPC_AUTH_QUEUE,
+    MQ_ROUTING_KEY_RPC_PING_QUEUE,
     MQ_MESSAGE_TTL,
 )
 
@@ -34,6 +35,8 @@ def declare_queues(channel):
     # Объявляем очереди для user_service
     channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE, durable=True, arguments=args)
 
+    # Объявляем очереди для monitoring_service
+    channel.queue_declare(queue=MQ_ROUTING_KEY_RPC_PING_QUEUE, durable=True, arguments=args)
 
 def main():
     connection_params = pika.ConnectionParameters(

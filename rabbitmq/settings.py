@@ -21,4 +21,5 @@ MQ_ROUTING_KEY_RPC_MOVIE_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_MOVIE_QUEUE', 'rp
 MQ_ROUTING_KEY_RPC_USER_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_USER_QUEUE', 'rpc_user_queue')
 MQ_ROUTING_KEY_RPC_AUTH_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_AUTH_QUEUE', 'rpc_auth_queue')
 MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE', 'rpc_elastic_queue') 
+MQ_ROUTING_KEY_RPC_PING_QUEUE = os.getenv('MQ_ROUTING_KEY_RPC_PING_QUEUE', 'rpc_ping_queue') 
 MQ_MESSAGE_TTL = int(os.getenv('MQ_MESSAGE_TTL', 6000))  # Время жизни сообщения в миллисекундах

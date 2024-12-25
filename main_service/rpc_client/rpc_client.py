@@ -11,6 +11,7 @@ from settings import (
     MQ_ROUTING_KEY_RPC_USER_QUEUE,
     MQ_ROUTING_KEY_RPC_AUTH_QUEUE,
     MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE,
+    MQ_ROUTING_KEY_RPC_PING_QUEUE,
     MQ_MESSAGE_TTL,
 )
 
@@ -113,4 +114,11 @@ def get_user_rpc_client():
             Returns rpc_client for user service
     '''
     return RpcClient(MQ_ROUTING_KEY_RPC_USER_QUEUE)
+
+
+def get_ping_rpc_client():
+    '''
+            Returns rpc_client for user service
+    '''
+    return RpcClient(MQ_ROUTING_KEY_RPC_PING_QUEUE)
 
