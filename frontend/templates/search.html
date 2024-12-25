@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Movies</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <!-- Шапка с заголовком -->
-    <header>
-        <h1>Search Movies</h1>
-    </header>
+{% extends "base.html" %}
 
-    <!-- Контейнер для поиска -->
-    <div class="search-container">
-        <form id="searchForm">
-            <input type="text" id="title" name="title" placeholder="Enter movie title...">
-            <button type="submit">Search</button>
-        </form>
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/css/search_styles.css">
+{% endblock %}
+
+{% block content %}
+    <div class="search-page-container">
+        <!-- Контейнер для поиска -->
+        <div class="search-container">
+            <form id="searchForm" class="search-form">
+                <input type="text" id="title" name="title" placeholder="Enter movie title...">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Контейнер для результатов -->
+        <div class="results-container" id="results">
+            <!-- Здесь будут отображаться результаты поиска -->
+        </div>
     </div>
-
-    <!-- Контейнер для результатов -->
-    <div class="results-container" id="results"></div>
 
     <!-- JavaScript -->
     <script>
@@ -83,5 +80,4 @@
             }
         });
     </script>
-</body>
-</html>
+{% endblock %}
