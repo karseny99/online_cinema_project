@@ -11,10 +11,15 @@
         nav {
             background-color: #333;
             overflow: hidden;
+            position: fixed; /* Фиксированное позиционирование */
+            top: 0; /* Привязка к верхней части экрана */
+            left: 0; /* Привязка к левой части экрана */
             width: 100%; /* Ширина на всю страницу */
+            z-index: 1000; /* Убедимся, что бар поверх других элементов */
             display: flex;
-            justify-content: center;
-            padding: 10px 0;
+            justify-content: center; /* Центрирование кнопок */
+            padding: 10px 0; /* Отступы сверху и снизу */
+            margin: 0; /* Убираем внешние отступы */
         }
 
         nav a {
@@ -23,7 +28,7 @@
             padding: 14px 16px;
             text-decoration: none;
             font-size: 17px;
-            margin: 0 10px;
+            margin: 0 10px; /* Отступы между кнопками */
             border-radius: 4px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
@@ -41,6 +46,7 @@
 
         /* Отступ для основного контента, чтобы он не перекрывался навигационным баром */
         main {
+            margin-top: 80px; /* Увеличиваем отступ для учета навигационного бара */
             padding: 20px;
         }
     </style>
