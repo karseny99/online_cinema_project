@@ -1,9 +1,12 @@
 from passlib.context import CryptContext
 from jose import JWTError, jwt
+import logging
+
 import app.repositories.user, app.repositories.movie_rating
 from datetime import datetime, timedelta
 from app.models.models import UserInfoResponse, UserInfoRequest, Movie
 
+log = logging.getLogger(__name__)
 
 class UserService:
     def __init__(self):
@@ -15,10 +18,11 @@ class UserService:
         '''
         user_info = app.repositories.user.get_user_info(request.user_id)
         ratings_info = self.movie_rating_repository.get_ratings_info(request.user_id)
+        log.info(f"RATINGS: {ratings_info}")
         ratings_info = [Movie(
             movie_id=movie.movie_id,
             movie_title="",
-            rating=movie.rating_id,
+            rating=movie.rating,
         ) for movie in ratings_info]
 
         if not user_info:

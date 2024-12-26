@@ -24,6 +24,13 @@ class GetMovieRatingResponse(BaseModel):
     rating: Optional[int] = None
     success: bool
 
+
+class Movie(BaseModel):
+    movie_id: Optional[int] = None
+    movie_title: Optional[str] = None
+    rating: Optional[float] = None
+
+
 class UserInfoRequest(BaseModel):
     user_id: int
 
