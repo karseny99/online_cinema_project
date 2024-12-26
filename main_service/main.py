@@ -12,6 +12,7 @@ from handlers.auth import router as auth_router
 from handlers.user_handler import router as user_router
 from handlers.ping import router as ping_router
 from handlers.user_handler import get_user_info
+from handlers.movie_upload import router as movie_upload_router
 import uvicorn
 
 app = FastAPI()
@@ -26,6 +27,7 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(movie_router, prefix="/api", tags=["movies catalog"])
 app.include_router(user_router, prefix="/api", tags=["set movie rating"])
 app.include_router(ping_router, prefix="/api", tags=["ping"])
+app.include_router(movie_upload_router, prefix="/api", tags=["movies upload"])
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -71,7 +73,6 @@ async def monitoring(request: Request, user: dict = Depends(is_admin)):
     return templates.TemplateResponse("admin_panel.html", {"request": request})
 
 
-# Обработчик для всех других несуществующих маршрутов
 @app.get("/{full_path:path}", response_class=HTMLResponse)
 async def catch_all(request: Request, full_path: str):
     return templates.TemplateResponse("page_not_found.html", {"request": request, "message": "Страница не найдена."})
