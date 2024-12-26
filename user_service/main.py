@@ -98,7 +98,7 @@ def get_movie_rating(message_data):
         print(result.model_dump())
         return result.model_dump()
     except Exception as e:
-        log.error(f"Error occured: {str(e)}")
+        log.error(f"Error occurred: {str(e)}")
         return GetMovieRatingResponse(movie_id=None, user_id=None, rating=None, success=False).model_dump()
 
 
@@ -119,5 +119,5 @@ def get_info(message_data) -> UserInfoResponse:
         redis_client.set(cache_key, result.model_dump(), 24 * 3600)
         return result.model_dump()
     except Exception as e:
-        log.error(f"Error occured: {str(e)}")
+        log.error(f"Error occurred: {str(e)}")
         return UserInfoResponse(movie_id=None, user_id=None, rating=None, success=False).model_dump()

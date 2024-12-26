@@ -9,12 +9,12 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #e6f0ff;
             color: #333;
         }
 
         header {
-            background-color: #2c3aa8;
+            background-color: #1a73e8;
             color: white;
             text-align: center;
             padding: 1rem 0;
@@ -37,7 +37,7 @@
         .user-info h2 {
             margin: 0 0 1rem;
             font-size: 1.5rem;
-            color: #4CAF50;
+            color: #1a73e8;
         }
 
         .user-info p {
@@ -52,6 +52,7 @@
         .ratings h3 {
             font-size: 1.3rem;
             margin-bottom: 1rem;
+            color: #1a73e8;
         }
 
         .movie-list {
@@ -64,8 +65,8 @@
         }
 
         .movie-item {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
+            background-color: #f0f8ff;
+            border: 1px solid #cce1ff;
             padding: 1rem;
             border-radius: 5px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -78,20 +79,20 @@
 
         .movie-item a {
             text-decoration: none;
-            color: #333;
+            color: #1a73e8;
             font-size: 1rem;
             font-weight: bold;
         }
 
         .movie-item a:hover {
-            color: #4CAF50;
+            color: #0056b3;
         }
 
         .movie-item span {
             display: block;
             margin-top: 0.5rem;
             font-size: 0.9rem;
-            color: #777;
+            color: #555;
         }
     </style>
 </head>
@@ -107,6 +108,11 @@
             <p><strong>Email:</strong> <span id="email">Loading...</span></p>
             <p><strong>Role:</strong> <span id="role">Loading...</span></p>
             <p><strong>Registered At:</strong> <span id="registered_at">Loading...</span></p>
+        </div>
+
+        <!-- Admin Panel Button -->
+        <div id="admin-panel-container" style="display: none; margin-top: 1rem;">
+            <button id="admin-panel-button" onclick="redirectToAdminPanel()">Admin Panel</button>
         </div>
 
         <!-- Ratings -->
@@ -142,7 +148,9 @@
 
                     const movieList = document.getElementById('movie-list');
                     movieList.innerHTML = '';
-
+                    if (data.role === "admin") {
+                        document.getElementById('admin-panel-container').style.display = 'block';
+                    }
                     if (data.ratings && data.ratings.length > 0) {
                         data.ratings.forEach(movie => {
                             const listItem = document.createElement('li');
@@ -153,7 +161,7 @@
                             link.textContent = movie.movie_title || 'Untitled Movie';
 
                             const rating = document.createElement('span');
-                            rating.textContent = `Rating: ${movie.rating || 'N/A'}/10`;
+                            rating.textContent = `Rating: ${movie.rating || 'N/A'}/5`;
 
                             listItem.appendChild(link);
                             listItem.appendChild(rating);
@@ -170,7 +178,9 @@
                 alert('An error occurred while fetching user data.');
             }
         }
-
+        function redirectToAdminPanel() {
+            window.location.href = '/admin_panel';
+        }
         // Fetch user info on page load
         document.addEventListener('DOMContentLoaded', fetchUserInfo);
     </script>
