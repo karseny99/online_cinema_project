@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-from sqlalchemy import distinct
+from sqlalchemy import distinct, desc
 from app.repository.database import *
-from app.repository.models import MoviesWithInfo, Genre
+from app.repository.models import MoviesWithInfo, Genre, Recommendation
 
 
 @connection
@@ -24,3 +24,49 @@ def get_distinct_genres(session) -> list[str]:
     '''
     genres = session.execute(select(distinct(Genre.name)))
     return [row[0] for row in genres]
+
+
+@connection
+def get_recommendations(session, user_id: int) -> list[MoviesWithInfo]:
+    '''
+        
+    '''
+
+    query = select(Recommendation).where(Recommendation.user_id == user_id)
+    result = session.execute(query)
+
+    recommendation = result.one_or_none()
+
+    if not recommendation:
+        print(f"{user_id} wasnot found")
+        return None 
+
+    movie_ids = recommendation.movie_ids
+
+    # Получаем информацию о фильмах по массиву movie_ids
+    if movie_ids:
+        movies_query = select(MoviesWithInfo).where(MoviesWithInfo.movie_id.in_(movie_ids))
+        movies_result = session.execute(movies_query)
+        
+        movies = [MoviesWithInfo.from_orm(movie) for movie in movies_result.scalars().all()]
+        return movies
+
+    return None
+
+
+
+@connection
+def get_top_movies(session, limit: int = 100) -> list[MoviesWithInfo]:
+    '''
+        
+    '''
+    result = session.execute(
+        select(MoviesWithInfo)
+        .where(MoviesWithInfo.year >= 1980)
+        .order_by(desc(MoviesWithInfo.average_rating))
+        .limit(limit)
+    )
+    
+    movies = result.scalars().all()
+
+    return [MoviesWithInfo.from_orm(movie) for movie in movies]

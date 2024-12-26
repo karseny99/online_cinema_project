@@ -3,7 +3,7 @@ import logging
 import logging
 
 import app.repository.movie
-from app.models.models import MovieItem, MovieInfoResponse, GenresResponse
+from app.models.models import MovieItem, MovieInfoResponse, GenresResponse, RecommendationRequest, RecommendationResponse
 from s3.movie import S3Repository
 
 s3_url = "localhost:9000"
@@ -50,3 +50,16 @@ class MovieService:
 
         genres = GenresResponse(genres=genres, success=True)
         return genres
+
+    def get_recommendations(request: RecommendationRequest) -> RecommendationResponse:
+        '''
+
+        '''
+
+        recommendations = app.repository.movie.get_recommendations(user_id=request.user_id)
+        if not recommendations:
+            recommendations = app.repository.movie.get_top_movies(limit=100)
+        
+        recommendations = [MovieItem.from_orm(movie) for movie in recommendations]
+        recommendations = RecommendationResponse(movies=recommendations, success=True)
+        return recommendations

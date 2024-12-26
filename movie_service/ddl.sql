@@ -264,3 +264,9 @@ AS SELECT m.movie_id,
 
 ALTER TABLE public.movies_with_info OWNER TO "user";
 GRANT ALL ON TABLE public.movies_with_info TO "user";
+
+
+CREATE TABLE recommendations (
+    user_id INT REFERENCES Users(user_id),
+    movie_ids INT[] -- Массив идентификаторов фильмов
+);

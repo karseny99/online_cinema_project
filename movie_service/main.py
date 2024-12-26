@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from kombu import Queue
 import json
 
-from app.models.models import MovieRequest, MovieInfoResponse, GenresResponse
+from app.models.models import MovieRequest, MovieInfoResponse, GenresResponse, RecommendationRequest, RecommendationResponse
 from app.services.movie_service import MovieService
 from app.services.redis import RedisClient
 from settings import (
@@ -85,4 +85,26 @@ def get_distinct_genres():
     except Exception as e:
         print(f"Exception occured: {e}")
         return GenresResponse(genres=None, success=False).model_dump()
+
+
+@app.task(queue=MQ_ROUTING_KEY_RPC_MOVIE_QUEUE, name='get_recommendations')
+def get_recommendations(message_data):
+    ''' 
+        Returns list of recommended MovieItems 
+    '''
+
+    # try:
+    # cache_key = f"get_recommendations:{json.dumps(message_data)}"
+    # cached_result = redis_client.get(cache_key)
+    # if cached_result:
+    #     return cached_result
+
+    message = RecommendationRequest(**message_data)
+
+    result = MovieService.get_recommendations(message)
+    # redis_client.set(cache_key, result.model_dump(), 24 * 3600) # 24 hours cache's life
+    return result.model_dump()
+    # except Exception as e:
+    print(f"Exception occured: {e}")
+    return RecommendationResponse(movies=None, success=False).model_dump()
 

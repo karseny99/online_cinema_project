@@ -3,7 +3,7 @@ from typing import Optional, List, Any
 from app.repository.models import MoviesWithInfo
 
 class MovieItem(BaseModel):
-    movie_id: int
+    movie_id: Optional[int]
     movie_title: Optional[str]
     year: Optional[int]
     director: Optional[str]
@@ -39,4 +39,11 @@ class MovieRequest(BaseModel):
 
 class GenresResponse(BaseModel):
     genres: Optional[List[Optional[str]]]
+    success: bool
+
+
+class RecommendationRequest(BaseModel):
+    user_id: int
+class RecommendationResponse(BaseModel):
+    movies: Optional[List[Optional[MovieItem]]]
     success: bool

@@ -2,179 +2,174 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
-from repository.movie_user_repo import get_ratings, get_movies
+from app.repository.repository import get_ratings_in_batches, get_unique_movies, update_database_recommendations, get_rated_movies
+import os
+from surprise import Reader, Dataset
+from surprise import SVDpp
+from joblib import dump, load
+from collections import defaultdict
+from datetime import datetime
+import glob
+import json
+import ast
 
 
 class MLRecommendation:
-
-    # https://github.com/rcz7795/Movie-Recommendation-System/blob/main/Movie_Recommendation_System.ipynb
-    # Тут буквально есть всё на требуемом уровне
-
-    def __init__(self):
+    def __init__(self, model_path: str = None):
         '''
-            Здесь инициализация бустинга (xgboost | catboost) решайте сами
-            вызывается load_model
-
-            Первое: проверка, можно ли вгрузить веса или как-то 
-            загрузить локально сохраненную модель. 
-            Реализовать вгрузку локальных данных без обработки датафрейма. 
-            
-            Если нельзя:
-            сюда нужно вынести загрузку этих 20 млн рейтингов
-            с вызовом обработки данных.
-            Можно либо загружать с нуля всё здесь, 
-            либо использовать метод fit и в него кидать батчи
-            (То есть в data будет, например, информация по 1000 человек)
-            Но, подозреваю, будет больно с обработкой данных, потому что 
-            data_processing работает на всем датасете вроде как
+            Инициализация модели
         '''
-        pass
+        self.svd_model = None
+        self.load_batch_size = None
+        self.fit_batch_size = None
+        self.unique_movies = None
 
-    def prepare_data(self):
-        pass
+        if model_path == None:
+            if not self.load_last_model():
+                raise FileNotFoundError("File not found: Cannot load last model")
+        elif not self.load_model(model_path):
+            raise FileNotFoundError("File not found: Cannot load model")
+        
 
-    def fit(self, data: list[your_type]):
+    def update_model(self):
         '''
-            Функция нужна для дообучения
-            data - это список, в котором элемент - это информация об оценках пользователей,
-            как выглядит эта информация вы решаете сами 
-            (она должна еще и совпадать с тем, что получится после data_preparation)
+            Обучение новой модели батчами
         '''
-        # for user in data:
-        #     model.fit(user)
+        self.svd_model = SVDpp(n_factors=400, lr_all=0.006, n_epochs=20, verbose=True)
+        self.batch_size = 10000
+        self.fit_batch_size = 1000400 
+        self.unique_movies = get_unique_movies()
 
-    def predict_for_user(self, user_id: int) -> list:
+        data = self.load_data()
+        n_batches = len(data) // self.batch_size + 1 
+
+        for i in range(n_batches):
+            batch = data[i * self.fit_batch_size: (i + 1) * self.fit_batch_size]
+            self.fit(batch)
+
+
+    def fit(self, data):
         '''
-            Посмотреть можно ли сделать предикт только для одного юзера 
-            без подсчета всей матрицы
-            Возврат list[movie_id]
+            По данным делается fit в модель
         '''
-        pass
+        reader = Reader(rating_scale=(1, 5))
+        data = Dataset.load_from_df(data[["user_id", "movie_id", "rating"]], reader)
+        trainset = data.build_full_trainset()
 
-    def predict_relevance_matrix(self):
+        self.svd_model.fit(trainset)
+
+
+    def update_recommendations(self, users_list):
         '''
-            Подсчет всей матрицы
+            Обновление рекомендаций для данного user списка в бд
         '''
-        pass
-
-    def save_model(self, path: str) -> None:
-        '''
-            Примерно так
-            from catboost import CatBoostClassifier
-
-            # Создание и обучение модели
-            model = CatBoostClassifier(iterations=100, depth=3, learning_rate=0.1, loss_function='Logloss')
-            model.fit(X_train, y_train)
-
-            # Сохранение модели
-            model.save_model('catboost_model.cbm')
-
-        '''
-        pass
-    
-    def save_model_mlflow(self):
-        '''
-            Сохранить модель в MLflow (пока не надо)
-        '''
-        weights = self.get_model_weights()
-        pass
-
-    def load_model(self, path: str) -> None:
-        '''
-            Загрузить модель 
-            Пример
-            from catboost import CatBoostClassifier
-
-            # Создание экземпляра модели
-            model = CatBoostClassifier()
-
-            # Загрузка модели
-            model.load_model('catboost_model.cbm')
-
-        '''
-        pass
-
-
-class MLRecomendation:
-    def __init__(self):
-        # Параметры для инициализации
-        self.knn_model = None
-        self.user_item_matrix = None
-        self.csr_data = None
-
-    def prepare_data(self, ratings_path: str, movies_path: str) -> None:
-        """
-        Подготавливает данные для модели.
-        """
-        ratings = get_ratings(ratings_path)
-        movies = get_movies(movies_path)
-
-        # Создание матрицы пользователь-фильм
-        self.user_item_matrix = ratings.pivot(index='movie_id', columns='user_id', values='rating')
-        self.user_item_matrix.fillna(0, inplace = True)
-
-        # Отфильтровываем фильмы и пользователей с малым количеством оценок
-        users_votes = ratings.groupby('user_id')['rating'].count()
-        movies_votes = ratings.groupby('movie_id')['rating'].count()
-        user_mask = users_votes[users_votes > 50].index
-        movie_mask = movies_votes[movies_votes > 10].index
-
-        self.user_item_matrix = self.user_item_matrix.loc[movie_mask, :]
-        self.user_item_matrix = self.user_item_matrix.loc[:, user_mask]
-
-        # Преобразование разреженной матрицы
-        self.csr_data = csr_matrix(self.user_item_matrix.values)
-        self.user_item_matrix = self.user_item_matrix.rename_axis(None, axis = 1).reset_index()
-
-    def train_knn(self) -> None:
-        """
-        Обучает модель kNN.
-        """
-        self.knn_model = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=20, n_jobs=-1)
-        self.knn_model.fit(self.csr_data)
-
-    def predict_relevance_matrix(self) -> pd.DataFrame:
-        """
-        Создает матрицу предсказаний релевантности.
-        """
-        user_ids = self.user_item_matrix.columns
-        movie_ids = self.user_item_matrix.index
-
-        relevance_matrix = pd.DataFrame(0, index=user_ids, columns=movie_ids, dtype=float)
-
-        for movie_index, row in enumerate(self.user_item_matrix.itertuples(index=False)):
-            distances, indices = self.knn_model.kneighbors(self.csr_data[movie_index], n_neighbors=20)
-
-            for user_index, distance in zip(indices.flatten(), distances.flatten()):
-                if user_index >= len(user_ids):
+        rated_movies = get_rated_movies(user_list=users_list)
+        users_recommendations = []
+        for user_id in users_list:
+            user_recommendations = []
+            for movie_id in self.unique_movies:
+                if movie_id in rated_movies:
                     continue
-                user_id = user_ids[user_index]
-                movie_id = movie_ids[movie_index]
-                relevance_matrix.loc[user_id, movie_id] = (1 - distance) * 5
 
-        return relevance_matrix
+                predicted_rating = self.svd_model.predict(user_id, movie_id).est
+                user_recommendations.append((movie_id, predicted_rating))
 
-    def run_recommendation_pipeline(self) -> pd.DataFrame:
-        """
-        Полный цикл работы рекомендательной системы.
-        """
-        # Пути к данным
-        ratings_path ="~/rating.csv"
-        movies_path ="~/movie.csv"
+            user_recommendations.sort(key=lambda x: x[1], reverse=True)
 
-        # print("получили пути")
+            movie_ids = [rec[0] for rec in user_recommendations[:100]]
+            users_recommendations.append((user_id, movie_ids))
 
-        # Подготовка данных
-        self.prepare_data(ratings_path, movies_path)
+        update_database_recommendations(new_data=users_recommendations)
 
-        # print("подготовили данные")
 
-        # Обучение модели
-        self.train_knn()
+    def update_recommendations_from_csv(self, path: str):
+        '''
+            Обновление рекомендаций из csv файла
+        '''
 
-        # print("обучили модель")
+        data = pd.read_csv(path, sep='|')
 
-        # Предсказание матрицы релевантности
-        relevance_matrix = self.predict_relevance_matrix()
-        # print("матрица создана")
-        return relevance_matrix
+        def convert_to_list(x):
+            return list(map(int, x.split(',')))
+
+        # Применяем функцию к столбцу 'movie_ids'
+        data['movie_ids'] = data['movie_ids'].apply(convert_to_list)
+        # print(data[['user_id', 'movie_ids']].values.tolist())
+        # print(data.columns)
+
+        print("Uploaded df")
+        update_database_recommendations(new_data=data[['user_id', 'movie_ids']].values.tolist())
+
+
+
+    def save_model(self) -> None:
+        '''
+            Сохранение модели
+        '''
+
+        filename = f"ml_models/svd_model{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        dump(self.svd_model, f'{filename}.pkl')
+
+        params = {
+            'load_batch_size': self.load_batch_size,
+            'fit_batch_size': self.fit_batch_size,
+            'unique_movies': self.unique_movies
+        }
+    
+        with open(f'{filename}.json', 'w') as json_file:
+            json.dump(params, json_file)
+
+
+    def load_last_model(self) -> bool:
+        '''
+            Загрузка последнего файла модели c параметрами
+        '''
+        files = glob.glob('ml_models/svd_model*.pkl')
+        if files:
+            latest_file = sorted(files, key=lambda x: os.path.getmtime(x))[-1]
+            self.svd_model = load(latest_file)
+
+            param_file = f"{os.path.splitext(latest_file)[0]}.json"
+            if os.path.exists(param_file):
+                with open(param_file, 'r') as json_file:
+                    params = json.load(json_file)
+                    self.load_batch_size, self.fit_batch_size, self.unique_movies = params['load_batch_size'], params['fit_batch_size'], params['unique_movies']
+            else:
+                raise FileNotFoundError(f"Error: Cannot find param file {param_file}")
+
+        return self.svd_model != None
+
+
+    def load_model(self, path: str) -> bool:
+        '''
+            Загрузка модели (true/false была ли модель локально найдена c параметрами)
+        '''
+        if not os.path.isfile(path):
+            return False
+        else:
+            self.svd_model = load(path)
+
+            param_file = f"{os.path.splitext(path)[0]}.json"
+            if os.path.exists(param_file):
+                with open(param_file, 'r') as json_file:
+                    params = json.load(json_file)
+                    self.load_batch_size, self.fit_batch_size, self.unique_movies = params['load_batch_size'], params['fit_batch_size'], params['unique_movies']
+            else:
+                raise FileNotFoundError(f"Error: Cannot find param file {param_file}")
+
+            return True
+
+
+    def load_data(self, save_path = "ratings.csv") -> pd.DataFrame:
+        '''
+            Вызывает репо слой для загрузки всех нужных данных
+            10 min execution time
+        '''
+        
+        get_ratings_in_batches(batch_size=self.batch_size, save_path="ratings.csv")
+        
+        data = pd.read_csv(save_path)
+        data.drop(columns=['rating_id', 'rated_at'], inplace=True)
+        data.reset_index(drop=True, inplace=True)
+
+        return data

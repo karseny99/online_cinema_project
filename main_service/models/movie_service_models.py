@@ -6,7 +6,7 @@ class ElasticRequest(BaseModel):
     title: Optional[str]
     year: Optional[int]
     genre: Optional[
-        List[Optional[str]]]  # <- я хз почему я не сделал множественное число как в возврате, но мне лень пиздец менять
+    List[Optional[str]]]  
     director: Optional[str]
     page: Optional[int] = 1
     page_size: Optional[int] = 10
@@ -40,4 +40,13 @@ class MovieRequest(BaseModel):
 
 class GenresResponse(BaseModel):
     genres: Optional[List[Optional[str]]]
+    success: bool
+
+    
+class RecommendationRequest(BaseModel):
+    user_id: int
+
+
+class RecommendationResponse(BaseModel):
+    movies: Optional[List[Optional[MovieItem]]]
     success: bool
