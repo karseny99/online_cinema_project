@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  auth_service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./auth_service:/app
+
+  user_service:
+    build:
+      context: ./user_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./user_service:/app
+
+  elastic_service:
+    build:
+      context: ./elastic_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./elastic_service:/app
+
+  movie_service:
+    build:
+      context: ./movie_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./movie_service:/app
+
+  main_service:
+    build:
+      context: ./main_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./main_service:/app
+
+  redis:
+    image: redis:7.4.1
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=your_password
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      MQ_HOST: localhost
+      MQ_PORT: 5672
+      RMQ_USER: guest
+      RMQ_PASSWORD: guest
+      MQ_ROUTING_KEY_DLQ: rpc_dlq
+      MQ_ROUTING_KEY_RPC_MOVIE_QUEUE: rpc_movie_queue
+      MQ_ROUTING_KEY_RPC_USER_QUEUE: rpc_user_queue
+      MQ_ROUTING_KEY_RPC_ELASTIC_QUEUE: rpc_elastic_queue
+      MQ_ROUTING_KEY_RPC_AUTH_QUEUE: rpc_auth_queue
+      MQ_MESSAGE_TTL: 6000
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq # Сохраняем данные RabbitMQ
+
+  minio:
+    image: minio/minio
+    container_name: cinema-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_SERVER_URL: "http://localhost:9000"
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  minio-client:
+    image: bitnami/minio-client
+    container_name: cinema-minio-client
+    depends_on:
+      - minio
+    entrypoint: [ "/bin/bash", "-c", "--" ]
+    command: |
+      "while true; do sleep 30; done"
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  rabbitmq_data:
+  minio_data:
+  postgres_data:
