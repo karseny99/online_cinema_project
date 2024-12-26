@@ -63,3 +63,9 @@ class Recommendation(Base):
 
     user_id = Column(Integer, primary_key=True) 
     movie_ids = Column(ARRAY(Integer)) 
+    @classmethod 
+    def from_orm(cls, recomend_orm):
+        return cls(
+            user_id=recomend_orm.user_id,
+            movie_ids=recomend_orm.movie_ids,
+        )

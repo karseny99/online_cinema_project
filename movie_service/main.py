@@ -93,18 +93,18 @@ def get_recommendations(message_data):
         Returns list of recommended MovieItems 
     '''
 
-    # try:
-    # cache_key = f"get_recommendations:{json.dumps(message_data)}"
-    # cached_result = redis_client.get(cache_key)
-    # if cached_result:
-    #     return cached_result
+    try:
+        cache_key = f"get_recommendations:{json.dumps(message_data)}"
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return cached_result
 
-    message = RecommendationRequest(**message_data)
+        message = RecommendationRequest(**message_data)
 
-    result = MovieService.get_recommendations(message)
-    # redis_client.set(cache_key, result.model_dump(), 24 * 3600) # 24 hours cache's life
-    return result.model_dump()
-    # except Exception as e:
-    print(f"Exception occured: {e}")
-    return RecommendationResponse(movies=None, success=False).model_dump()
+        result = MovieService.get_recommendations(message)
+        redis_client.set(cache_key, result.model_dump(), 24 * 3600) # 24 hours cache's life
+        return result.model_dump()
+    except Exception as e:
+        print(f"Exception occured: {e}")
+        return RecommendationResponse(movies=None, success=False).model_dump()
 

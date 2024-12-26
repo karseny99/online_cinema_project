@@ -38,10 +38,11 @@ def get_recommendations(session, user_id: int) -> list[MoviesWithInfo]:
     recommendation = result.one_or_none()
 
     if not recommendation:
-        print(f"{user_id} wasnot found")
+        print(f"{user_id} wasn't found")
         return None 
-
-    movie_ids = recommendation.movie_ids
+    
+    recommendation_data = recommendation[0]
+    movie_ids = recommendation_data.movie_ids
 
     # Получаем информацию о фильмах по массиву movie_ids
     if movie_ids:
@@ -63,6 +64,8 @@ def get_top_movies(session, limit: int = 100) -> list[MoviesWithInfo]:
     result = session.execute(
         select(MoviesWithInfo)
         .where(MoviesWithInfo.year >= 1980)
+        .where(MoviesWithInfo.average_rating.isnot(None))  # Исключаем фильмы с NULL рейтингом
+        .where(MoviesWithInfo.average_rating <= 5)
         .order_by(desc(MoviesWithInfo.average_rating))
         .limit(limit)
     )
