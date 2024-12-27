@@ -110,7 +110,7 @@
                         movieDiv.className = 'movie'; // Добавляем класс для стилизации
                         movieDiv.innerHTML = `<h3><a href="/movies/${movie.movie_id}">${movie.movie_title}</a></h3>
                                             <p>Director: ${movie.director}</p>
-                                            <p>Rating: ${(movie.average_rating).toFixed(1)}</p>
+                                            <p>Rating: ${(movie.average_rating * 2).toFixed(1)}</p>
                                             <p>Description: ${movie.description || 'N/A'}</p>`;
                         resultsDiv.appendChild(movieDiv);
                     });
