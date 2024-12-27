@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 class SetMovieRatingRequest(BaseModel):
     movie_id: int
@@ -34,11 +34,12 @@ class Movie(BaseModel):
 class UserInfoRequest(BaseModel):
     user_id: int
 
+
 class UserInfoResponse(BaseModel):
     user_id: Optional[int]
     username: Optional[str]
     email: Optional[str]
     role: Optional[str]
     registered_at: Optional[datetime]
+    ratings: Optional[List[Optional[Movie]]]
     success: bool
-
