@@ -18,7 +18,7 @@ class UserService:
         ratings_info = [Movie(
             movie_id=movie.movie_id,
             movie_title="",
-            rating=movie.rating_id,
+            rating=movie.rating,
         ) for movie in ratings_info]
 
         if not user_info:

@@ -61,11 +61,10 @@ def ping(message_data) -> PingResponse:
         
         elif request.service_type == "minio":
             minio_client = Minio(
-                MINIO_CONFIG['endpoint'],
-                access_key=MINIO_CONFIG['access_key'],
-                secret_key=MINIO_CONFIG['secret_key'],
+                "karseny.asuscomm.com:9000",
+                access_key="minioadmin",
+                secret_key="minioadmin",
                 secure=False,  # Установите True, если используете HTTPS
-                http_client=Minio.create_http_client(timeout=MINIO_TIMEOUT),
             )
             # Попробуем получить список бакетов для проверки доступности
             buckets = minio_client.list_buckets()
@@ -76,7 +75,7 @@ def ping(message_data) -> PingResponse:
             ).model_dump()
     
         else:
-            raise ValueError
+            raise ValueError()
     except OperationalError as e:
         return PingResponse(
             service_type=request.service_type,
@@ -90,6 +89,7 @@ def ping(message_data) -> PingResponse:
             success=True,
         ).model_dump()
     except Exception as e:
+        print(str(e))
         return PingResponse(
             service_type=request.service_type,
             pong=None,

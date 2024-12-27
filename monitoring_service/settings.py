@@ -17,9 +17,9 @@ DB_CONFIG = {
 # }
 
 MINIO_CONFIG = {
-    'endpoint': 'minio_host:9000',
-    'access_key': 'your_access_key',
-    'secret_key': 'your_secret_key',
+    'endpoint': 'karseny.asuscomm.com:9000',
+    'access_key': 'minioadmin',
+    'secret_key': 'minioadmin',
 }
 
 

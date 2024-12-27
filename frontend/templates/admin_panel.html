@@ -85,7 +85,7 @@
         </form>
     </div>
 
-    <iframe src="http://localhost:5555"></iframe>
+    <iframe src="http://karseny.asuscomm.com:5555"></iframe>
 
     <script>
         async function checkService(serviceType) {
@@ -108,7 +108,7 @@
 
         async function uploadMovie() {
             const formData = new FormData(document.getElementById("movieUploadForm"));
-            const response = await fetch("http://localhost:8000/api/upload_movie", {
+            const response = await fetch("http://karseny.asuscomm.com:8000/api/upload_movie", {
                 method: "POST",
                 body: formData,
             });
@@ -119,7 +119,7 @@
 
         async function uploadPoster() {
             const formData = new FormData(document.getElementById("posterUploadForm"));
-            const response = await fetch("http://localhost:8000/api/upload_poster", {
+            const response = await fetch("http://karseny.asuscomm.com:8000/api/upload_poster", {
                 method: "POST",
                 body: formData,
             });

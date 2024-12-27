@@ -4,7 +4,7 @@ import os
 
 import logging
 
-BASE_URL = "localhost:9000"
+BASE_URL = "karseny.asuscomm.com:9000"
 MOVIES_BUCKET = "movies"
 MOVIES_POSTERS_BUCKET = "posters"
 ACCESS_KEY = "minioadmin"
@@ -49,8 +49,8 @@ class S3Repository:
         logging.info(f"movie name: {object_name}")
         if not self.file_exists(object_name):
             return dict({
-                "movie_url": f"{self.base_url}/{MOVIES_BUCKET}/default-movie.mp4",
-                "movie_poster_url": f"{self.base_url}/{MOVIES_POSTERS_BUCKET}/default-poster.png"
+                "movie_url": None,
+                "movie_poster_url": None,
             })
 
         return dict({
