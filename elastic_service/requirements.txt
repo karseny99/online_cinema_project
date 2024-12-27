@@ -1,0 +1,9 @@
+elasticsearch==8.16.0
+SQLAlchemy==1.4.49
+asyncpg==0.30.0
+pandas==2.2.3
+aiohttp==3.11.10
+pydantic==2.10.3
+celery==5.4.0
+redis==5.2.1
+psycopg2_binary==2.9.10

@@ -1,0 +1,184 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-container {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin: 20px;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+    display: block;
+}
+
+input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+button {
+    background: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 30px; 
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+p {
+    text-align: center;
+    color: #666;
+    margin-top: 15px;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#results {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.movie {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: box-shadow 0.3s;
+}
+
+.movie:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pagination-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.select2-container--default .select2-selection--multiple {
+    height: 38px; /* Установите желаемую высоту */
+}
+
+#results {
+    clear: both;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.container {
+    display: flex;
+    flex-direction: column; /* Элементы будут располагаться в столбик */
+    align-items: center; /* Центрируем элементы по горизонтали */
+}
+
+.loading {
+    position: relative;
+    pointer-events: none; /* Отключаем взаимодействие с кнопкой во время загрузки */
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px; /* Размер индикатора загрузки */
+    height: 10px; /* Размер индикатора загрузки */
+    border: 3px solid #fff; /* Цвет границы */
+    border-top: 3px solid transparent; /* Цвет верхней части */
+    border-radius: 50%;
+    animation: spin 1s linear infinite; /* Анимация вращения */
+    transform: translate(-50%, -50%); /* Центрируем индикатор */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+#suggestions {
+    border: 1px solid #ccc;
+    display: none; /* Скрываем по умолчанию */
+    position: absolute; /* Позиционируем относительно родителя (обертки) */
+    background-color: white;
+    z-index: 1000; /* Убедитесь, что он выше других элементов */
+    width: calc(100% - 2px); /* Ширина равна ширине поля ввода */
+    max-height: 100px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем прокрутку, если слишком много подсказок */
+    margin-top: 2px; /* Отступ сверху, чтобы не перекрывать поле ввода */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Добавляем тень для подсказок */
+    border-radius: 5px; /* Закругляем углы */
+    margin-top: -22px;
+}
+
+
+#suggestions div {
+    cursor: pointer;
+    padding: 5px;
+}
+
+#suggestions div:hover {
+    background-color: #f0f0f0; /* Подсветка при наведении */
+}

@@ -1,0 +1,1 @@
+celery -A main worker --loglevel=info --prefetch-multiplier=1 --hostname=user_service@%h

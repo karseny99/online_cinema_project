@@ -1,0 +1,25 @@
+services:
+  minio:
+    image: minio/minio
+    container_name: cinema-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_SERVER_URL: "http://localhost:9000"
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # MinIO API
+      - "9001:9001" # MinIO Web Console
+    volumes:
+      - minio_data:/data
+
+  minio-client:
+    image: bitnami/minio-client
+    container_name: cinema-minio-client
+    depends_on:
+      - minio
+    entrypoint: [ "/bin/bash", "-c", "--" ]
+    command: |
+      "while true; do sleep 30; done"
+volumes:
+  minio_data:
