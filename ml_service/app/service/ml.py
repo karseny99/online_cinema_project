@@ -63,23 +63,51 @@ class MLRecommendation:
         '''
             Обновление рекомендаций для данного user списка в бд
         '''
-        rated_movies = get_rated_movies(user_list=users_list)
-        users_recommendations = []
-        for user_id in users_list:
-            user_recommendations = []
-            for movie_id in self.unique_movies:
-                if movie_id in rated_movies:
-                    continue
+        reader = Reader(rating_scale=(1, 5))
+        data = self.load_data()
+        dataset = Dataset.load_from_df(data, reader)
+        full_trainset = dataset.build_full_trainset()
 
-                predicted_rating = self.svd_model.predict(user_id, movie_id).est
-                user_recommendations.append((movie_id, predicted_rating))
+        batch_size = 1000 
+        all_items = full_trainset.all_items()
+        with open('temp.csv', 'a') as f:
+            f.write('user_id,movie_ids\n')
+            for user_inner_id in full_trainset.all_users():
+                
+                user_id = full_trainset.to_raw_uid(user_inner_id)
 
-            user_recommendations.sort(key=lambda x: x[1], reverse=True)
+                rated_items = full_trainset.ur[user_inner_id] 
+                rated_movie_ids = [full_trainset.to_raw_iid(movie_id) for movie_id, _ in rated_items]
+                
+                unobserved_items = [movie_id for movie_id in all_items if full_trainset.knows_item(movie_id) and full_trainset.to_raw_iid(movie_id) not in rated_movie_ids]
+                
+                anti_testset = [(user_id, movie_id, None) for movie_id in unobserved_items]
+                
+                predictions = self.svd_model.test(anti_testset)
+                
+                top_predictions = sorted(predictions, key=lambda x: x.est, reverse=True)[:100]
+                movie_ids = [pred[1] for pred in top_predictions]
+                f.write(f'{user_id}, {str(movie_ids)}\n')
 
-            movie_ids = [rec[0] for rec in user_recommendations[:100]]
-            users_recommendations.append((user_id, movie_ids))
+        self.update_recommendations_from_csv('temp.csv')
 
-        update_database_recommendations(new_data=users_recommendations)
+        # rated_movies = get_rated_movies(user_list=users_list)
+        # users_recommendations = []
+        # for user_id in users_list:
+        #     user_recommendations = []
+        #     for movie_id in self.unique_movies:
+        #         if movie_id in rated_movies:
+        #             continue
+
+        #         predicted_rating = self.svd_model.predict(user_id, movie_id).est
+        #         user_recommendations.append((movie_id, predicted_rating))
+
+        #     user_recommendations.sort(key=lambda x: x[1], reverse=True)
+
+        #     movie_ids = [rec[0] for rec in user_recommendations[:100]]
+        #     users_recommendations.append((user_id, movie_ids))
+
+        # update_database_recommendations(new_data=users_recommendations)
 
 
     def update_recommendations_from_csv(self, path: str):
